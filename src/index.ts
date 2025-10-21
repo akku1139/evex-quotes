@@ -5,18 +5,35 @@ import { GoogleGenAI } from '@google/genai';
 
 // init db
 
-const db = await (async <T extends Readonly<object>>() => {
+const db = await (async () => {
+  type DB = {
+    channels: Array<Snowflake>
+  };
+  const dbPath = './data.json';
+
   let lock = false;
-  const queue = [];
-  const data = JSON.parse((await fs.readFile('./data.json')).toString()) as T;
+  const queue: Array<Promise<unknown>> = [];
+  const data = JSON.parse((await fs.readFile(dbPath)).toString()) as DB;
+
+  const job = async () => {
+      const wait = () => {
+        const p = new Promise((resolve) => {
+
+        });
+      queue.push(p);
+      return p;
+    }); // TODO
+
+  };
+  const sync = async () => await fs.writeFile(dbPath, JSON.stringify(data));
 
   return {
-    get() {},
-    set(path: keyof typeof T) {},
+    async get() {
+    },
+    async set<P extends keyof DB>(path: P, newData: DB[P]) {
+    },
   }
-})<{
-  channels: Array<Snowflake>
-}>();
+})();
 
 // init gemini
 
