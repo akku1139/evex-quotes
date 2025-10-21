@@ -12,25 +12,42 @@ const db = await (async () => {
   const dbPath = './data.json';
 
   let lock = false;
-  const queue: Array<Promise<unknown>> = [];
+  const queue: Array<(v: unknown) => void> = []; // Promise resolve
   const data = JSON.parse((await fs.readFile(dbPath)).toString()) as DB;
 
-  const job = async () => {
-      const wait = () => {
-        const p = new Promise((resolve) => {
+  // internal
+  const wait = async () => {
+    const p = new Promise((resolve) => {
+      queue.push(resolve);
+    });
+    queue[0](void 0);
+    await p;
+    return;
+  };
+  const release = () => {
+    queue
+  };
 
-        });
-      queue.push(p);
-      return p;
-    }); // TODO
 
+  const job = async <T>(fn: () => T): Promise<T> => {
+    await wait();
+    const res = fn();
+    release();
+    return res;
   };
   const sync = async () => await fs.writeFile(dbPath, JSON.stringify(data));
 
   return {
-    async get() {
+    async get<P extends keyof DB>(path: P) {
+      return await job(() => {
+        return data[path];
+      });
     },
     async set<P extends keyof DB>(path: P, newData: DB[P]) {
+      return await job(async () => {
+        data[path] = newData;
+        await sync();
+      });
     },
   }
 })();
