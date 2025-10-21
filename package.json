@@ -9,6 +9,7 @@
   "license": "AGPL-3.0-or-later",
   "packageManager": "pnpm@10.18.3",
   "devDependencies": {
+    "@types/node": "^22.18.12",
     "typescript": "^5.9.3"
   },
   "dependencies": {

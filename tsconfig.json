@@ -7,5 +7,6 @@
     "strict": true,
     "noImplicitAny": true,
     "skipLibCheck": true,
+    "types": ["node"],
   }
 }
