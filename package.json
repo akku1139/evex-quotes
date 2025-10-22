@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "tsc"
+    "test": "tsc",
+    "start": "node --env-file=.env --experimental-strip-types src/index.ts"
   },
   "license": "AGPL-3.0-or-later",
   "packageManager": "pnpm@10.18.3",

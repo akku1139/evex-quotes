@@ -1,13 +1,15 @@
-import { Client, GatewayIntentBits, Snowflake, SlashCommandBuilder, type ApplicationCommandDataResolvable, Interaction, MessageFlags, CacheType, ChatInputCommandInteraction } from 'discord.js';
+import { Client, GatewayIntentBits, type Snowflake, SlashCommandBuilder, type ApplicationCommandDataResolvable, MessageFlags, type ChatInputCommandInteraction } from 'discord.js';
 import fs from 'node:fs/promises';
 import { GoogleGenAI } from '@google/genai';
-import { Mutex } from './mutex.js';
-import { getEnv } from './utild.js';
-import { Logger } from './logger.js';
+import { Mutex } from './mutex.ts';
+import { getEnv } from './utild.ts';
+import { Logger } from './logger.ts';
 
 // init log
 
+const mainLogger = new Logger('main');
 const commandLogger = new Logger('commands');
+const aiLogger = new Logger('ai');
 
 // init db
 
@@ -42,16 +44,21 @@ const db = await (async () => {
 // init gemini
 
 const GEMINI_API_KEY = getEnv('GEMINI_API_KEY');
-const GOOGLE_CLOUD_PROJECT = getEnv('GOOGLE_CLOUD_PROJECT');
-const GOOGLE_CLOUD_LOCATION = getEnv('GOOGLE_CLOUD_LOCATION');
-const GOOGLE_GENAI_USE_VERTEXAI = getEnv('GOOGLE_GENAI_USE_VERTEXAI');
+// const GOOGLE_CLOUD_PROJECT = getEnv('GOOGLE_CLOUD_PROJECT');
+// const GOOGLE_CLOUD_LOCATION = getEnv('GOOGLE_CLOUD_LOCATION');
+// const GOOGLE_GENAI_USE_VERTEXAI = false;
 
 // init djs
 
-const client = new Client({ intents: [GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers] });
+const client = new Client({ intents: [
+  GatewayIntentBits.Guilds,
+  GatewayIntentBits.GuildMessages,
+  GatewayIntentBits.MessageContent,
+  GatewayIntentBits.GuildMembers,
+] });
 
 client.on('ready', readyClient => {
-  console.log(`Logged in as ${readyClient.user.tag}!`);
+  mainLogger.info(`Logged in as ${readyClient.user.tag}!`);
 });
 
 // commands
@@ -62,9 +69,20 @@ const addCommand = (cmd: SlashCommandBuilder, execute: InteractionCallback) => {
   commands[cmd.name] = [cmd, execute];
 };
 
+// AI
+
 addCommand(new SlashCommandBuilder().setName('enableai').setDescription('enable AI feature in this channel'), async i => {
+  aiLogger.info(`ai was enabled in channel ID: ${i.channelId}`);
   i.reply('test');
 });
+
+client.on('messageCreate', async m => {
+  if(m.mentions.users.has(client.user!.id)) {
+    await m.reply('hi!')
+  }
+});
+
+// start djs
 
 client.on('ready', async c => {
   c.application.commands.set(Object.values(commands).map(v => v[0]));

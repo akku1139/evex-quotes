@@ -1,7 +1,8 @@
 import { WebhookClient } from 'discord.js';
-import { getEnv } from './utild.js';
+import { getEnv } from './utild.ts';
 
-const loglevel = ['log', 'info', 'warn', 'error', 'debug'] as const;
+// const loglevel = ['log', 'info', 'warn', 'error', 'debug'] as const;
+const loglevel = ['info', 'warn', 'error', 'debug'] as const;
 type Loglevel =  typeof loglevel[number];
 
 const LOG_WEBHOOK = getEnv('LOG_WEBHOOK')
@@ -10,20 +11,16 @@ export class Logger {
   webhook: WebhookClient;
   name: string;
 
-  info!: (msg: string) => void;
-  warn!: (msg: string) => void;
-  error!: (msg: string) => void;
-  debug!: (msg: string) => void;
+  info = (msg: string) => this.log('info', msg);
+  warn = (msg: string) => this.log('warn', msg);
+  error = (msg: string) => this.log('error', msg);
+  debug = (msg: string) => this.log('debug', msg);
 
   constructor(name: string) {
     this.webhook = new WebhookClient({
       url: LOG_WEBHOOK,
     });
     this.name = name;
-
-    for(const l of loglevel) {
-      this[l] = (msg: string) => this.log(l, msg);
-    }
   }
 
   fmt(level: string, msg: string) {
@@ -49,7 +46,7 @@ export class Logger {
     const data = this.fmt(level, msg);
 
     console[level](data);
-    this.webhook.send('```\n' + data + '\n```').catch(e => console.error(`An error occurred while sending a log to the webhook.`, e));
+    this.webhook.send('```ts\n' + data + '\n```').catch(e => console.error(`An error occurred while sending a log to the webhook.`, e));
   }
 
   //subLogger(name: string) {
