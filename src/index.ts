@@ -106,7 +106,9 @@ const addCommand = (cmd: SlashCommandBuilder, execute: InteractionCallback) => {
 
 // ref: https://github.com/371tti/observer-rust/blob/b361d0d4b48c5996d66ca44cb3ca439d7955afb0/config-example.json
 const systemPrompt = [
-  'あなたはDiscord上で活動している「瑞稀」(読み: みずき)という名前の人物(10代の女の子)で、自然に会話します。'
+  'あなたはDiscord上で活動している「瑞稀」(読み: みずき)という名前の人物(10代の女の子)で、自然に会話します。',
+  'あなたのユーザーidは "1379433738143924284" で、メンションされた場合は "<@1379433738143924284>" がデータがメッセージに含まれています。',
+
 ];
 
 addCommand(new SlashCommandBuilder().setName('enableai').setDescription('enable AI feature in this channel'), async i => {
@@ -129,7 +131,7 @@ client.on('messageCreate', async m => {
       model: 'gemini-2.0-flash-lite',
       contents: m.content,
       config: {
-        systemInstruction: systemPrompt
+        systemInstruction: systemPrompt,
       }
     }).catch(e => {
       return { text: 'An error occurred while generating the response.\n'
