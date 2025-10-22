@@ -121,9 +121,9 @@ addCommand(new SlashCommandBuilder().setName('enableai').setDescription('enable 
 
 client.on('messageCreate', async m => {
   if(m.mentions.users.has(client.user!.id) && await db.inArray('aichannels', m.channelId)) {
-    const intervalId = setInterval(() => {
+    // const intervalId = setInterval(() => {
       m.channel.sendTyping();
-    });
+    // });
 
     const res = await genai.models.generateContent({
       model: 'gemini-2.0-flash-lite',
@@ -136,9 +136,9 @@ client.on('messageCreate', async m => {
             + (e instanceof Error ? `${e.name}: ${e.message}` : String(e))
       }
     });
-    clearInterval(intervalId);
+    // clearInterval(intervalId);
 
-    m.channel.send(`${res.text}\n-# model: gemini-2.0-flash-lite`);
+    m.channel.send(`${res.text}${res.text?.endsWith('\n') ? '' : '\n'}-# model: gemini-2.0-flash-lite`);
   }
 });
 
