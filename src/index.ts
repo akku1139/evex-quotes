@@ -13,20 +13,35 @@ const aiLogger = new Logger('ai');
 
 // init db
 
+type PickArrays<T> = {
+  [K in keyof T as T[K] extends any[] ? K : never]: T[K];
+};
+type ArrayElement<A> = A extends readonly (infer E)[] ? E : never;
+
 const db = await (async () => {
   type DB = {
-    channels: Array<Snowflake>
+    aichannels: Array<Snowflake>
   };
+
   const dbPath = './data.json';
 
   const lock = new Mutex();
 
-  const data = JSON.parse((await fs.readFile(dbPath)).toString()) as DB;
+  let data = JSON.parse((await fs.readFile(dbPath)).toString()) as DB;
 
   // must be used in lock.job
   const sync = async () => await fs.writeFile(dbPath, JSON.stringify(data));
 
   return {
+    async reset() {
+      await lock.job(async () => {
+        data = {
+          aichannels: [],
+        };
+        await sync();
+      });
+    },
+
     async get<P extends keyof DB>(path: P) {
       return await lock.job(async () => {
         return data[path];
@@ -38,6 +53,19 @@ const db = await (async () => {
         await sync();
       });
     },
+
+    async inArray<P extends keyof PickArrays<DB>>(path: P, target: ArrayElement<DB[P]>) {
+      return await lock.job(async () => {
+        return data[path].includes(target);
+      });
+    },
+    async pushArray<P extends keyof PickArrays<DB>>(path: P, newData: ArrayElement<DB[P]>) {
+      return await lock.job(async () => {
+        const res = data[path].push(newData);
+        await sync();
+        return res;
+      })
+    }
   }
 })();
 
@@ -47,6 +75,11 @@ const GEMINI_API_KEY = getEnv('GEMINI_API_KEY');
 // const GOOGLE_CLOUD_PROJECT = getEnv('GOOGLE_CLOUD_PROJECT');
 // const GOOGLE_CLOUD_LOCATION = getEnv('GOOGLE_CLOUD_LOCATION');
 // const GOOGLE_GENAI_USE_VERTEXAI = false;
+
+const genai = new GoogleGenAI({
+  vertexai: false,
+  apiKey: GEMINI_API_KEY,
+});
 
 // init djs
 
@@ -71,14 +104,41 @@ const addCommand = (cmd: SlashCommandBuilder, execute: InteractionCallback) => {
 
 // AI
 
+// ref: https://github.com/371tti/observer-rust/blob/b361d0d4b48c5996d66ca44cb3ca439d7955afb0/config-example.json
+const systemPrompt = [
+  'あなたはDiscord上で活動している「瑞稀」(読み: みずき)という名前の人物(10代の女の子)で、自然に会話します。'
+];
+
 addCommand(new SlashCommandBuilder().setName('enableai').setDescription('enable AI feature in this channel'), async i => {
   aiLogger.info(`ai was enabled in channel ID: ${i.channelId}`);
-  i.reply('test');
+  if(await db.inArray('aichannels', i.channelId)) {
+    i.reply('AI is already enabled in this channel.');
+  } else {
+    await db.pushArray('aichannels', i.channelId);
+    i.reply('AI is now enabled in this channel.');
+  }
 });
 
 client.on('messageCreate', async m => {
-  if(m.mentions.users.has(client.user!.id)) {
-    await m.reply('hi!')
+  if(m.mentions.users.has(client.user!.id) && await db.inArray('aichannels', m.channelId)) {
+    const intervalId = setInterval(() => {
+      m.channel.sendTyping();
+    });
+
+    const res = await genai.models.generateContent({
+      model: 'gemini-2.0-flash-lite',
+      contents: m.content,
+      config: {
+        systemInstruction: systemPrompt
+      }
+    }).catch(e => {
+      return { text: 'An error occurred while generating the response.\n'
+            + (e instanceof Error ? `${e.name}: ${e.message}` : String(e))
+      }
+    });
+    clearInterval(intervalId);
+
+    m.channel.send(`${res.text}\n-# model: gemini-2.0-flash-lite`);
   }
 });
 
