@@ -136,51 +136,30 @@ addCommand(new SlashCommandBuilder().setName('enableai').setDescription('enable 
 
 const aichats: Map<Snowflake, Chat> = new Map();
 
-type ToolDefinition<
-  P extends JSONSchema,
-  R = unknown,
-> = {
-  description: string,
-  parameters: P,
-  execute: (args: FromSchema<P>) => R,
-};
+const defineAITool = <
+  N extends string,
+  S extends JSONSchema,
+  D = FromSchema<S>,
+>(name: N, data: { description: string, parameters: S }, execute: (args: D) => unknown) => ({ [name]: { ...data, execute } });
 
-type ToolBase = {
-    description: string,
-    parameters: JSONSchema,
-    execute: (...args: any) => any,
-};
-
-const defineAITools = <
-  T extends Record<string, ToolBase>
->(
-  tools: {
-    [K in keyof T]:
-      T[K] extends { parameters: infer P }
-        ? P extends JSONSchema
-          ? T[K] extends { execute: (args: any) => infer R }
-            ? ToolDefinition<P, R>
-            : never
-          : never
-        : never
-  }
-) => tools;
-
-const aitools = defineAITools({
-  fetch_message: {
-    description: 'DiscordのメッセージURLからメッセージ内容を取得します',
-    parameters: {
-      type: 'object',
-      properties: {
-        url: { type: 'string', description: 'メッセージのURL' },
-      },
-      required: ['url'],
-    } as const,
-    execute(args) {
+const aitools = {
+  ...defineAITool(
+    'fetch_message',
+    {
+      description: 'DiscordのメッセージURLからメッセージ内容を取得します',
+      parameters: {
+        type: 'object',
+        properties: {
+          url: { type: 'string', description: 'メッセージのURL' },
+        },
+        required: ['url'],
+      } as const,
+    },
+    (args) => {
       return 'message content';
     },
-  },
-});
+  )
+};
 
 // const aitools = {
 //   fetch_message: {
