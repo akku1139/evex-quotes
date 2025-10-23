@@ -2,7 +2,7 @@
 
 import { Client, GatewayIntentBits, type Snowflake, SlashCommandBuilder, type ApplicationCommandDataResolvable, MessageFlags, type ChatInputCommandInteraction } from 'discord.js';
 import fs from 'node:fs/promises';
-import { type Chat, type GenerateContentResponse, GoogleGenAI, type FunctionCall } from '@google/genai';
+import { type Chat, type GenerateContentResponse, GoogleGenAI, type FunctionCall, type Schema as GenAISchema } from '@google/genai';
 import { Mutex } from './mutex.ts';
 import { getEnv } from './utils.ts';
 import { Logger } from './logger.ts';
@@ -194,7 +194,7 @@ client.on('messageCreate', async m => {
             return {
               name: t[0],
               description: t[1]['description'],
-              parameters: t[1]['parameters'],
+              parameters: t[1]['parameters'] as any as GenAISchema, // FIXME
             }
           }) }],
         },
