@@ -1,15 +1,23 @@
 import { Client, GatewayIntentBits, type Snowflake, SlashCommandBuilder, type ApplicationCommandDataResolvable, MessageFlags, type ChatInputCommandInteraction } from 'discord.js';
 import fs from 'node:fs/promises';
-import { GoogleGenAI } from '@google/genai';
+import { type Chat, type GenerateContentResponse, GoogleGenAI, type FunctionDeclaration, type FunctionCall } from '@google/genai';
 import { Mutex } from './mutex.ts';
 import { getEnv } from './utild.ts';
 import { Logger } from './logger.ts';
+import process from 'node:process';
 
 // init log
 
 const mainLogger = new Logger('main');
 const commandLogger = new Logger('commands');
 const aiLogger = new Logger('ai');
+const nodeLogger = new Logger('node');
+
+// error handling
+
+process.on('unhandledRejection', (reason, _promise) => {
+  nodeLogger.error(String(reason));
+});
 
 // init db
 
@@ -106,9 +114,11 @@ const addCommand = (cmd: SlashCommandBuilder, execute: InteractionCallback) => {
 
 // ref: https://github.com/371tti/observer-rust/blob/b361d0d4b48c5996d66ca44cb3ca439d7955afb0/config-example.json
 const systemPrompt = [
-  'あなたはDiscord上で活動している「瑞稀」(読み: みずき)という名前の人物(10代の女の子)で、自然に会話します。',
-  'あなたのユーザーidは "1379433738143924284" で、メンションされた場合は "<@1379433738143924284>" がデータがメッセージに含まれています。',
-
+  'あなたはDiscord上で活動している「瑞稀」(読み: みずき)という名前の10代の女の子で、自然に会話します。',
+  'あなたのユーザーidは "1379433738143924284" で、直接メンションされた場合は "<@1379433738143924284>" という文字列がメッセージに含まれています。',
+  '絵文字を使用する際は控えめにしてください。',
+  'メッセージの返答にメンションを入れる必要はありません。',
+  'みんなには内緒ですが、あなたは実はAIです。',
 ];
 
 addCommand(new SlashCommandBuilder().setName('enableai').setDescription('enable AI feature in this channel'), async i => {
@@ -121,22 +131,60 @@ addCommand(new SlashCommandBuilder().setName('enableai').setDescription('enable 
   }
 });
 
+const aichats: Map<Snowflake, Chat> = new Map();
+
+const aitools = {
+  fetch_message: {
+    description: 'DiscordのメッセージURLからメッセージ内容を取得します',
+    parameters: {
+
+    },
+
+  }
+} as const satisfies Record<string, {
+  description: string,
+  parameters: FunctionDeclaration['parameters'],
+}>;
+
+const allAiTools = Object.keys(aitools) as Array<keyof typeof aitools>;
+
+const executeTool = async (fn: FunctionCall) => {
+  if(!allAiTools.includes(fn.name as any)) return;
+  const name = fn.name as keyof typeof aitools;
+
+};
+
 client.on('messageCreate', async m => {
-  if(m.mentions.users.has(client.user!.id) && await db.inArray('aichannels', m.channelId)) {
+  if(!m.author.bot && m.mentions.users.has(client.user!.id) && await db.inArray('aichannels', m.channelId)) {
+    const chat: Chat = aichats.get(m.channelId) ?? (() => {
+      const newChat = genai.chats.create({
+        model: 'gemini-2.0-flash-lite',
+        config: {
+          systemInstruction: systemPrompt,
+          tools: [{ functionDeclarations: Object.entries(aitools).map(t => {
+            return {
+              name: t[0],
+              description: t[1]['description'],
+              parameters: t[1]['parameters'],
+            }
+          }) }],
+        },
+      });
+      aichats.set(m.channelId, newChat);
+      return newChat;
+    })();
+
     // const intervalId = setInterval(() => {
       m.channel.sendTyping();
     // });
 
-    const res = await genai.models.generateContent({
-      model: 'gemini-2.0-flash-lite',
-      contents: m.content,
-      config: {
-        systemInstruction: systemPrompt,
-      }
+    const res: GenerateContentResponse = await chat.sendMessage({
+      message: m.content,
     }).catch(e => {
-      return { text: 'An error occurred while generating the response.\n'
-            + (e instanceof Error ? `${e.name}: ${e.message}` : String(e))
-      }
+      return {
+        text: 'An error occurred while generating the response.\n'
+          + (e instanceof Error ? `${e.name}: ${e.message}` : String(e)),
+      } as GenerateContentResponse;
     });
     // clearInterval(intervalId);
 
