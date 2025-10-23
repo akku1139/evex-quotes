@@ -18,11 +18,21 @@ importers:
       '@types/node':
         specifier: ^22.18.12
         version: 22.18.12
+      '@typescript/native-preview':
+        specifier: 7.0.0-dev.20251023.1
+        version: 7.0.0-dev.20251023.1
+      json-schema-to-ts:
+        specifier: ^3.1.1
+        version: 3.1.1
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
 
 packages:
+
+  '@babel/runtime@7.28.4':
+    resolution: {integrity: sha512-Q/N6JNWvIvPnLDvjlE1OUBLPQHH6l3CltCEsHIujp45zQUSSh8K+gHnaEX45yAT1nyngnINhvWtzN+Nb9D8RAQ==}
+    engines: {node: '>=6.9.0'}
 
   '@discordjs/builders@1.12.2':
     resolution: {integrity: sha512-AugKmrgRJOHXEyMkABH/hXpAmIBKbYokCEl9VAM4Kh6FvkdobQ+Zhv7AR6K+y5hS7+VQ7gKXPYCe1JQmV07H1g==}
@@ -81,6 +91,45 @@ packages:
 
   '@types/ws@8.18.1':
     resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
+
+  '@typescript/native-preview-darwin-arm64@7.0.0-dev.20251023.1':
+    resolution: {integrity: sha512-Qe8KKzhe+bEn84+c90DPBYMkLZ1Q6709DmxStlhdSJycO4GAXlURcLyFAegbLGUPen2oU1NISFlCuOoGUDufvw==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@typescript/native-preview-darwin-x64@7.0.0-dev.20251023.1':
+    resolution: {integrity: sha512-1WDzpaluw8y4qfOGTyAFHRskEcg/qPSYQwkDj3jw9lLpYwhXo6uqZ7TmPEX9QhzjtUvmMCnqq4hvwPN/0e3h8Q==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@typescript/native-preview-linux-arm64@7.0.0-dev.20251023.1':
+    resolution: {integrity: sha512-Q4jcLjgP6GyUBFNgM9bQX5Scsq+RYFVEXkwC1a0f7Jpz8u3qzWz9VRJNzubHcXqFzCGbru0YPN5bZMylNOlP+g==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@typescript/native-preview-linux-arm@7.0.0-dev.20251023.1':
+    resolution: {integrity: sha512-Q/GxNqqqN3LNVayrWrcdV8aB1tzDbAPWeYqpvAeJpaeioIPXpcA+nqmw9yLkgCQbWMD/YA2Dum8otWtYP6sUyQ==}
+    cpu: [arm]
+    os: [linux]
+
+  '@typescript/native-preview-linux-x64@7.0.0-dev.20251023.1':
+    resolution: {integrity: sha512-JH5LJMcUPWuCBPgrGybSSKoM4ktpBgxIBCLhunpL0z9vMxHOAXMbfLFu8cdM8X+rr6H+C0IDi/mEvUqMNOvlsA==}
+    cpu: [x64]
+    os: [linux]
+
+  '@typescript/native-preview-win32-arm64@7.0.0-dev.20251023.1':
+    resolution: {integrity: sha512-8n/uGR9pwkf3VO8Pok/0TOo0SUyDRlFdE7WWgundGz+X3rlSZYdi7fI9mFYmnSSFOOB7gKbiE0fFFSTIcDY36Q==}
+    cpu: [arm64]
+    os: [win32]
+
+  '@typescript/native-preview-win32-x64@7.0.0-dev.20251023.1':
+    resolution: {integrity: sha512-GUz7HU6jSUwHEFauwrtdsXdbOVEQ0qv0Jaz3HJeUx+DrmU8Zl+FM1weOyq1GXmFDjw3dzzR5yIxCld3M3SMT6Q==}
+    cpu: [x64]
+    os: [win32]
+
+  '@typescript/native-preview@7.0.0-dev.20251023.1':
+    resolution: {integrity: sha512-vR8Hhj/6XYWzq+MquAncZeXjNdmncT3Jf5avdrMIWHYnmjWqcHtIX61NM3N32k2vcfoGfiHZgMGN4BCYmlmp0Q==}
+    hasBin: true
 
   '@vladfrangu/async_event_emitter@2.4.7':
     resolution: {integrity: sha512-Xfe6rpCTxSxfbswi/W/Pz7zp1WWSNn4A0eW4mLkQUewCrXXtMj31lCg+iQyTkh/CkusZSq9eDflu7tjEDXUY6g==}
@@ -163,6 +212,10 @@ packages:
   json-bigint@1.0.0:
     resolution: {integrity: sha512-SiPv/8VpZuWbvLSMtTDU8hEfrZWg/mH/nV/b4o0CYbSxu1UIQPLdwKOCIyLQX+VIPO5vrLX3i8qtqFyhdPSUSQ==}
 
+  json-schema-to-ts@3.1.1:
+    resolution: {integrity: sha512-+DWg8jCJG2TEnpy7kOm/7/AxaYoaRbjVB4LFZLySZlWn8exGs3A4OLJR966cVvU26N7X9TWxl+Jsw7dzAqKT6g==}
+    engines: {node: '>=16'}
+
   jwa@2.0.1:
     resolution: {integrity: sha512-hRF04fqJIP8Abbkq5NKGN0Bbr3JxlQ+qhZufXVr0DvujKy93ZCbXZMHDL4EOtodSbCWxOqR8MS1tXA5hwqCXDg==}
 
@@ -192,6 +245,9 @@ packages:
 
   safe-buffer@5.2.1:
     resolution: {integrity: sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==}
+
+  ts-algebra@2.0.0:
+    resolution: {integrity: sha512-FPAhNPFMrkwz76P7cdjdmiShwMynZYN6SgOujD1urY4oNm80Ou9oMdmbR45LotcKOXoy7wSmHkRFE6Mxbrhefw==}
 
   ts-mixer@6.0.4:
     resolution: {integrity: sha512-ufKpbmrugz5Aou4wcr5Wc1UUFWOLhq+Fm6qa6P0w0K5Qw2yhaUoiWszhCVuNQyNwrlGiscHOmqYoAox1PtvgjA==}
@@ -231,6 +287,8 @@ packages:
         optional: true
 
 snapshots:
+
+  '@babel/runtime@7.28.4': {}
 
   '@discordjs/builders@1.12.2':
     dependencies:
@@ -308,6 +366,37 @@ snapshots:
   '@types/ws@8.18.1':
     dependencies:
       '@types/node': 24.9.1
+
+  '@typescript/native-preview-darwin-arm64@7.0.0-dev.20251023.1':
+    optional: true
+
+  '@typescript/native-preview-darwin-x64@7.0.0-dev.20251023.1':
+    optional: true
+
+  '@typescript/native-preview-linux-arm64@7.0.0-dev.20251023.1':
+    optional: true
+
+  '@typescript/native-preview-linux-arm@7.0.0-dev.20251023.1':
+    optional: true
+
+  '@typescript/native-preview-linux-x64@7.0.0-dev.20251023.1':
+    optional: true
+
+  '@typescript/native-preview-win32-arm64@7.0.0-dev.20251023.1':
+    optional: true
+
+  '@typescript/native-preview-win32-x64@7.0.0-dev.20251023.1':
+    optional: true
+
+  '@typescript/native-preview@7.0.0-dev.20251023.1':
+    optionalDependencies:
+      '@typescript/native-preview-darwin-arm64': 7.0.0-dev.20251023.1
+      '@typescript/native-preview-darwin-x64': 7.0.0-dev.20251023.1
+      '@typescript/native-preview-linux-arm': 7.0.0-dev.20251023.1
+      '@typescript/native-preview-linux-arm64': 7.0.0-dev.20251023.1
+      '@typescript/native-preview-linux-x64': 7.0.0-dev.20251023.1
+      '@typescript/native-preview-win32-arm64': 7.0.0-dev.20251023.1
+      '@typescript/native-preview-win32-x64': 7.0.0-dev.20251023.1
 
   '@vladfrangu/async_event_emitter@2.4.7': {}
 
@@ -411,6 +500,11 @@ snapshots:
     dependencies:
       bignumber.js: 9.3.1
 
+  json-schema-to-ts@3.1.1:
+    dependencies:
+      '@babel/runtime': 7.28.4
+      ts-algebra: 2.0.0
+
   jwa@2.0.1:
     dependencies:
       buffer-equal-constant-time: 1.0.1
@@ -439,6 +533,8 @@ snapshots:
       formdata-polyfill: 4.0.10
 
   safe-buffer@5.2.1: {}
+
+  ts-algebra@2.0.0: {}
 
   ts-mixer@6.0.4: {}
 

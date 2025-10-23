@@ -4,13 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "tsc",
+    "test": "tsgo",
+    "test-tsc": "tsc",
     "start": "node --env-file=.env --experimental-strip-types src/index.ts"
   },
   "license": "AGPL-3.0-or-later",
   "packageManager": "pnpm@10.18.3",
   "devDependencies": {
     "@types/node": "^22.18.12",
+    "@typescript/native-preview": "7.0.0-dev.20251023.1",
+    "json-schema-to-ts": "^3.1.1",
     "typescript": "^5.9.3"
   },
   "dependencies": {

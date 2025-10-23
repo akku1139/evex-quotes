@@ -1,10 +1,13 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import { Client, GatewayIntentBits, type Snowflake, SlashCommandBuilder, type ApplicationCommandDataResolvable, MessageFlags, type ChatInputCommandInteraction } from 'discord.js';
 import fs from 'node:fs/promises';
-import { type Chat, type GenerateContentResponse, GoogleGenAI, type FunctionDeclaration, type FunctionCall } from '@google/genai';
+import { type Chat, type GenerateContentResponse, GoogleGenAI, type FunctionCall } from '@google/genai';
 import { Mutex } from './mutex.ts';
-import { getEnv } from './utild.ts';
+import { getEnv } from './utils.ts';
 import { Logger } from './logger.ts';
 import process from 'node:process';
+import type { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
 // init log
 
@@ -133,25 +136,72 @@ addCommand(new SlashCommandBuilder().setName('enableai').setDescription('enable 
 
 const aichats: Map<Snowflake, Chat> = new Map();
 
-const aitools = {
+type ToolDefinition<
+  P extends JSONSchema,
+  R = unknown,
+> = {
+  description: string,
+  parameters: P,
+  execute: (args: FromSchema<P>) => R,
+};
+
+type ToolBase = {
+    description: string,
+    parameters: JSONSchema,
+    execute: (...args: any) => any,
+};
+
+const defineAITools = <
+  T extends Record<string, ToolBase>
+>(
+  tools: {
+    [K in keyof T]:
+      T[K] extends { parameters: infer P }
+        ? P extends JSONSchema
+          ? T[K] extends { execute: (args: any) => infer R }
+            ? ToolDefinition<P, R>
+            : never
+          : never
+        : never
+  }
+) => tools;
+
+const aitools = defineAITools({
   fetch_message: {
     description: 'DiscordのメッセージURLからメッセージ内容を取得します',
     parameters: {
-
+      type: 'object',
+      properties: {
+        url: { type: 'string', description: 'メッセージのURL' },
+      },
+      required: ['url'],
+    } as const,
+    execute(args) {
+      return 'message content';
     },
+  },
+});
 
-  }
-} as const satisfies Record<string, {
-  description: string,
-  parameters: FunctionDeclaration['parameters'],
-}>;
+// const aitools = {
+//   fetch_message: {
+//     description: 'DiscordのメッセージURLからメッセージ内容を取得します',
+//     parameters: {
+//       type: OpenAPIType.OBJECT,
+//       properties: {
+//         url: { type: OpenAPIType.STRING }
+//       },
+//       required: ['url'],
+//     },
+//     execute() {},
+//   },
+// } as const satisfies ToolsRecord<typeof aitools>;
 
 const allAiTools = Object.keys(aitools) as Array<keyof typeof aitools>;
 
 const executeTool = async (fn: FunctionCall) => {
   if(!allAiTools.includes(fn.name as any)) return;
   const name = fn.name as keyof typeof aitools;
-
+  const execute = aitools[name];
 };
 
 client.on('messageCreate', async m => {
@@ -182,7 +232,7 @@ client.on('messageCreate', async m => {
       message: m.content,
     }).catch(e => {
       return {
-        text: '```\nAn error occurred while generating the response.\n'
+        text: '```ts\nAn error occurred while generating the response.\n'
           + (e instanceof Error ? `${e.name}: ${e.message}` : String(e)) + '\n```',
       } as GenerateContentResponse;
     });

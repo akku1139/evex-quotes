@@ -1,5 +1,7 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import { WebhookClient } from 'discord.js';
-import { getEnv } from './utild.ts';
+import { getEnv } from './utils.ts';
 
 // const loglevel = ['log', 'info', 'warn', 'error', 'debug'] as const;
 const loglevel = ['info', 'warn', 'error', 'debug'] as const;

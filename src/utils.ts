@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import process from 'node:process';
 
 export const getEnv = (name: string) => {
