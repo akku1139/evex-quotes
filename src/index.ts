@@ -182,8 +182,8 @@ client.on('messageCreate', async m => {
       message: m.content,
     }).catch(e => {
       return {
-        text: 'An error occurred while generating the response.\n'
-          + (e instanceof Error ? `${e.name}: ${e.message}` : String(e)),
+        text: '```\nAn error occurred while generating the response.\n'
+          + (e instanceof Error ? `${e.name}: ${e.message}` : String(e)) + '\n```',
       } as GenerateContentResponse;
     });
     // clearInterval(intervalId);
