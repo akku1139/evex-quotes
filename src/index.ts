@@ -140,7 +140,7 @@ const defineAITool = <
   N extends string,
   S extends JSONSchema,
   D = FromSchema<S>,
->(name: N, data: { description: string, parameters: S }, execute: (args: D) => unknown) => ({ [name]: { ...data, execute } });
+>(name: N, data: { description: string, parameters: S }, execute: (args: D) => Promise<unknown>) => ({ [name]: { ...data, execute } });
 
 const aitools = {
   ...defineAITool(
@@ -155,7 +155,8 @@ const aitools = {
         required: ['url'],
       } as const,
     },
-    (args) => {
+    async ({ url }) => {
+
       return 'message content';
     },
   )
