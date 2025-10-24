@@ -218,7 +218,7 @@ client.on('messageCreate', async m => {
     });
     // clearInterval(intervalId);
 
-    m.channel.send(`${res.text}${res.text?.endsWith('\n') ? '' : '\n'}-# model: gemini-2.0-flash-lite`);
+    m.reply(`${res.text}${res.text?.endsWith('\n') ? '' : '\n'}-# model: gemini-2.0-flash-lite`);
   }
 });
 
