@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { Client, GatewayIntentBits, type Snowflake, SlashCommandBuilder, type ApplicationCommandDataResolvable, MessageFlags, type ChatInputCommandInteraction, type OmitPartialGroupDMChannel, type Message, type TextBasedChannel } from 'discord.js';
+import { Client, GatewayIntentBits, type Snowflake, SlashCommandBuilder, type ApplicationCommandDataResolvable, MessageFlags, type ChatInputCommandInteraction, type OmitPartialGroupDMChannel, type Message } from 'discord.js';
 import fs from 'node:fs/promises';
-import { type Chat, type GenerateContentResponse, GoogleGenAI, type FunctionCall, type Schema as GenAISchema, type Behavior as FunctionBehavior, type SendMessageParameters, type Part as GenAIPart } from '@google/genai';
+import { type Chat, type GenerateContentResponse, GoogleGenAI, type Schema as GenAISchema, type SendMessageParameters, type Part as GenAIPart } from '@google/genai';
 import { Mutex } from './mutex.ts';
 import { getEnv } from './utils.ts';
 import { Logger } from './logger.ts';
 import process from 'node:process';
-import type { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { aitools, executeTool } from './tool.ts';
 
 // init log
 
@@ -139,89 +139,6 @@ addCommand(new SlashCommandBuilder().setName('enableai').setDescription('enable 
 
 const aichats: Map<Snowflake, Chat> = new Map();
 
-const defineAITool = <
-  N extends string,
-  P extends Readonly<JSONSchema>,
-  R extends Readonly<JSONSchema>,
-  PT = FromSchema<P>,
-  RT = FromSchema<R>
->(
-  name: N,
-  data: { description: string, parametersJsonSchema: P, responseJsonSchema: R },
-  execute: (args: PT) => Promise<[true, RT] | [true, { error: string }] | [false]>
-) => ({
-  [name]: {
-    ...data,
-    responseJsonSchema: {
-      oneOf: [
-        data.responseJsonSchema,
-        {
-          type: 'object',
-          properties: {
-            error: { type: 'string', description: '関数の実行中にエラーが発生した場合に通知されます'},
-          },
-          required: ['error'],
-        },
-      ],
-    } as const satisfies JSONSchema,
-    execute,
-  },
-});
-
-const aitools = {
-  ...defineAITool(
-    'fetch_message',
-    {
-      description: 'DiscordのメッセージURLからメッセージ内容を取得します',
-      parametersJsonSchema: {
-        type: 'object',
-        properties: {
-          url: { type: 'string', description: 'メッセージのURL' },
-        },
-        required: ['url'],
-      } as const,
-      responseJsonSchema: {
-        type: 'object',
-        properties: {
-          content: { type: 'string', description: 'メッセージの内容' },
-          // TODO: 投稿者を取得
-        },
-        required: ['content'],
-      } as const,
-    },
-    async ({ url }) => {
-
-      try {
-        const split = /https:\/\/(?:canary\.|ptb\.)?discord\.com\/channels\/(\d+)\/(\d+)\/(\d+)/.exec(url);
-        if(!split) return [true, { error: "URLのパース中にエラーが発生しました" }];
-
-        const [_, guildID, channelID, messageID] = split;
-        if(!guildID || !channelID || !messageID) return [true, { error: 'URLの要素が不足しています' }];
-
-        const _guild = await client.guilds.fetch(guildID);
-        const channel = await client.channels.fetch(channelID) as TextBasedChannel;
-        if(!channel) return [true, { error: 'チャンネルを取得できませんでした'}];
-        if(!channel.messages) return [true, { error: 'チャンネルが間違っています' }]
-        const message = await channel.messages.fetch(messageID);
-        return [true, {
-          content: message.content,
-        }];
-      } catch(err) {
-        return [true, { error: 'エラーが発生しました\n' + (err instanceof Error ? err.name + ': ' + err.message : String(err)) }];
-      }
-    },
-  )
-};
-
-const allAiTools = Object.keys(aitools) as Array<keyof typeof aitools>;
-
-const executeTool = async (fn: FunctionCall) => {
-  if(!allAiTools.includes(fn.name as any)) return;
-  const name = fn.name as keyof typeof aitools;
-  const execute = aitools[name].execute;
-  return await execute(fn.args as any);
-};
-
 const processAIResponse = async (
   res: GenerateContentResponse,
   ch: OmitPartialGroupDMChannel<Message>['channel'],
@@ -233,7 +150,7 @@ const processAIResponse = async (
   const fnRes: Array<GenAIPart> = [];
 
   for(const fn of res.functionCalls) {
-    const toolRes = await executeTool(fn);
+    const toolRes = await executeTool(fn, client as Client<true>); // FIXME:
     await ch.send(`-# Calling function "${fn.name}"...`);
     fnRes.push({
       functionResponse: {
