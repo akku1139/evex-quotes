@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import { type Client } from 'discord.js';
 import { type FunctionCall } from '@google/genai';
 import fetch_message from './aitools/fetch_message.ts'

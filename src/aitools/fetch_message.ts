@@ -1,8 +1,11 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import { defineAITool } from './common.ts';
 import { type TextBasedChannel } from 'discord.js';
 
+// TODO: Support reactions
+
 export default defineAITool(
-  'fetch_message',
   {
     description: 'DiscordのメッセージURLからメッセージ内容を取得します',
     parametersJsonSchema: {
@@ -16,9 +19,29 @@ export default defineAITool(
       type: 'object',
       properties: {
         content: { type: 'string', description: 'メッセージの内容' },
-        // TODO: 投稿者を取得
+        url: { type: 'string', description: 'メッセージのURL' },
+        author: {
+          type: 'object', description: 'メッセージ送信者',
+          properties: {
+            displayName: { type: 'string', description: '送信者の表示名' },
+            id: { type: 'string', description: '送信者のユーザーID' },
+            globalName: { type: 'string', description: '送信者のグローバル表示名' },
+            username: { type: 'string', description: '送信者のユーザー名' },
+          },
+          required: ['displayName', 'id', 'globalName', 'username'],
+        },
+        replies: {
+          type: 'object', description: 'メッセージのリプライ先情報',
+          properties: {
+            guildId: { type: 'string', description: 'ギルド(サーバー)ID' },
+            channelId: { type: 'string', description: 'チャンネルID' },
+            messageId: { type: 'string', description: 'メッセージID' },
+            type: { type: 'number', description: '0: 通常メッセージ, 1: 転送されたメッセージ' },
+          },
+          required: ['guildId', 'channelId', 'messageId', 'type'],
+        },
       },
-      required: ['content'],
+      required: ['content', 'url', 'author'],
     } as const,
   },
   async ({ url }, client) => {
@@ -37,7 +60,15 @@ export default defineAITool(
       const message = await channel.messages.fetch(messageID);
       return [true, {
         content: message.content,
-      }];
+        url: message.url,
+        author: {
+          displayName: message.author.displayName,
+          id: message.author.id,
+          globalName: message.author.globalName,
+          username: message.author.username,
+        },
+        replies: message.reference,
+      } as const];
     } catch(err) {
       return [true, { error: 'エラーが発生しました\n' + (err instanceof Error ? err.name + ': ' + err.message : String(err)) }];
     }

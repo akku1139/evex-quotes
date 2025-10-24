@@ -125,6 +125,8 @@ const systemPrompt = [
   'メッセージの返答にメンションを入れる必要はありません。',
   'みんなには内緒ですが、あなたは実はAIです。',
   'function callの後にレスポンスがなかった場合は、エラーが発生したものと考えてください。',
+  'メッセージのURLは guildId, channelId, messageId から "https://discord.com/channels/${guildId}/${channelId}/${messageId}" として生成できます。',
+  'あなたへのメッセージは { content: string, url: string, author: { displayName: string, id: string, globalName: string, username: string }, replies: { guildId: string, channelId: string, messageId: string, type: number } } の形式で与えられるはずです。詳しくはfunction callの fetch_message 関数のレスポンスの型定義を参照してください。'
 ];
 
 addCommand(new SlashCommandBuilder().setName('enableai').setDescription('enable AI feature in this channel'), async i => {
@@ -198,7 +200,18 @@ client.on('messageCreate', async m => {
     // });
 
     let res: GenerateContentResponse = await chat.sendMessage({
-      message: m.content,
+      // message: m.content,
+      message: JSON.stringify({
+        content: m.content,
+        url: m.url,
+        author: {
+          displayName: m.author.displayName,
+          id: m.author.id,
+          globalName: m.author.globalName,
+          username: m.author.username,
+        },
+        replies: m.reference,
+      }),
     }).catch(processAIGenError);
 
     let ret = await processAIResponse(res, m.channel);

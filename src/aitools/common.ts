@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 import { type Client } from 'discord.js';
 import type { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
@@ -8,7 +10,6 @@ export const defineAITool = <
   PT = FromSchema<P>,
   RT = FromSchema<R>
 >(
-  name: N,
   data: { description: string, parametersJsonSchema: P, responseJsonSchema: R },
   execute: (args: PT, client: Client<true>) => Promise<[true, RT] | [true, { error: string }] | [false]>
 ) => ({
