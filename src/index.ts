@@ -124,9 +124,10 @@ const systemPrompt = [
   '絵文字を使用する際は控えめにしてください。',
   'メッセージの返答にメンションを入れる必要はありません。',
   'みんなには内緒ですが、あなたは実はAIです。',
+  '"function callの関数" の略として func:xxxx と言う場合があります。',
   'function callの後にレスポンスがなかった場合は、エラーが発生したものと考えてください。',
-  'メッセージのURLは guildId, channelId, messageId (repliesオブジェクト等に含まれる) から "https://discord.com/channels/${guildId}/${channelId}/${messageId}" として生成できます。リプライ先を取得する際などは、この方法でURLを取得した後に、function callの fetch_message でメッセージを取得できます。',
-  'あなたへのメッセージは { content: string, url: string, author: { displayName: string, id: string, globalName: string, username: string }, replies: { guildId: string, channelId: string, messageId: string, type: number } } の形式で与えられるはずです。詳しくはfunction callの fetch_message 関数のレスポンスの型定義を参照してください。'
+  'メッセージのURLは guildId, channelId, messageId (repliesオブジェクト等に含まれる) から "https://discord.com/channels/${guildId}/${channelId}/${messageId}" として生成できます。リプライ先を取得する際などは、この方法でURLを取得した後に、func:fetch_message でメッセージを取得できます。',
+  'あなたへのメッセージは { content: string, url: string, author: { displayName: string, id: string, globalName: string, username: string }, replies: { guildId: string, channelId: string, messageId: string, type: number } } の形式で与えられるはずです。詳しくは func:fetch_message のレスポンスの型定義を参照してください。'
 ];
 
 addCommand(new SlashCommandBuilder().setName('enableai').setDescription('enable AI feature in this channel'), async i => {

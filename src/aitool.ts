@@ -3,9 +3,11 @@
 import { type Client } from 'discord.js';
 import { type FunctionCall } from '@google/genai';
 import fetch_message from './aitools/fetch_message.ts'
+// import search_duckduckgo_html from './aitools/search_duckducogo_html.ts'
 
 export const aitools = {
   fetch_message,
+  // search_duckduckgo_html,
 } as const;
 
 const allAiTools = Object.keys(aitools) as Array<keyof typeof aitools>;
