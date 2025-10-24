@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { Client, GatewayIntentBits, type Snowflake, SlashCommandBuilder, type ApplicationCommandDataResolvable, MessageFlags, type ChatInputCommandInteraction } from 'discord.js';
+import { Client, GatewayIntentBits, type Snowflake, SlashCommandBuilder, type ApplicationCommandDataResolvable, MessageFlags, type ChatInputCommandInteraction, type OmitPartialGroupDMChannel, type Message, type TextBasedChannel } from 'discord.js';
 import fs from 'node:fs/promises';
-import { type Chat, type GenerateContentResponse, GoogleGenAI, type FunctionCall, type Schema as GenAISchema } from '@google/genai';
+import { type Chat, type GenerateContentResponse, GoogleGenAI, type FunctionCall, type Schema as GenAISchema, type Behavior as FunctionBehavior, type SendMessageParameters, type Part as GenAIPart } from '@google/genai';
 import { Mutex } from './mutex.ts';
 import { getEnv } from './utils.ts';
 import { Logger } from './logger.ts';
@@ -138,51 +138,115 @@ const aichats: Map<Snowflake, Chat> = new Map();
 
 const defineAITool = <
   N extends string,
-  S extends JSONSchema,
-  D = FromSchema<S>,
->(name: N, data: { description: string, parameters: S }, execute: (args: D) => Promise<unknown>) => ({ [name]: { ...data, execute } });
+  P extends Readonly<JSONSchema>,
+  R extends Readonly<JSONSchema>,
+  PT = FromSchema<P>,
+  RT = FromSchema<R>
+>(
+  name: N,
+  data: { description: string, parametersJsonSchema: P, responseJsonSchema: R },
+  execute: (args: PT) => Promise<[true, RT] | [true, { error: string }] | [false]>
+) => ({
+  [name]: {
+    ...data,
+    responseJsonSchema: {
+      oneOf: [
+        data.responseJsonSchema,
+        {
+          type: 'object',
+          properties: {
+            error: { type: 'string', description: '関数の実行中にエラーが発生した場合に通知されます'},
+          },
+          required: ['error'],
+        },
+      ],
+    } as const satisfies JSONSchema,
+    execute,
+  },
+});
 
 const aitools = {
   ...defineAITool(
     'fetch_message',
     {
       description: 'DiscordのメッセージURLからメッセージ内容を取得します',
-      parameters: {
+      parametersJsonSchema: {
         type: 'object',
         properties: {
           url: { type: 'string', description: 'メッセージのURL' },
         },
         required: ['url'],
       } as const,
+      responseJsonSchema: {
+        type: 'object',
+        properties: {
+          content: { type: 'string', description: 'メッセージの内容' },
+          // TODO: 投稿者を取得
+        },
+        required: ['content'],
+      } as const,
     },
     async ({ url }) => {
+      const split = /https:\/\/(?:canary\.|ptb\.)?discord\.com\/channels\/(\d+)\/(\d+)\/(\d+)/.exec(url);
+      if(!split) return [true, { error: "URLのパース中にエラーが発生しました" }];
 
-      return 'message content';
+      const [_, guildID, channelID, messageID] = split;
+      if(!guildID || !channelID || !messageID) return [true, { error: 'URLの要素が不足しています' }];
+
+      const _guild = await client.guilds.fetch(guildID);
+      const channel = await client.channels.fetch(channelID) as TextBasedChannel;
+      if(!channel) return [true, { error: 'チャンネルを取得できませんでした'}];
+      if(!channel.messages) return [true, { error: 'チャンネルが間違っています' }]
+      const message = await channel.messages.fetch(messageID);
+
+      return [true, {
+        content: message.content,
+      }];
     },
   )
 };
-
-// const aitools = {
-//   fetch_message: {
-//     description: 'DiscordのメッセージURLからメッセージ内容を取得します',
-//     parameters: {
-//       type: OpenAPIType.OBJECT,
-//       properties: {
-//         url: { type: OpenAPIType.STRING }
-//       },
-//       required: ['url'],
-//     },
-//     execute() {},
-//   },
-// } as const satisfies ToolsRecord<typeof aitools>;
 
 const allAiTools = Object.keys(aitools) as Array<keyof typeof aitools>;
 
 const executeTool = async (fn: FunctionCall) => {
   if(!allAiTools.includes(fn.name as any)) return;
   const name = fn.name as keyof typeof aitools;
-  const execute = aitools[name];
+  const execute = aitools[name].execute;
+  return await execute(fn.args as any);
 };
+
+const processAIResponse = async (
+  res: GenerateContentResponse,
+  ch: OmitPartialGroupDMChannel<Message>['channel'],
+):
+  Promise<[true]
+        | [false, SendMessageParameters]> => {
+  if(!res.functionCalls || res.functionCalls.length === 0) return [true];
+
+  const fnRes: Array<GenAIPart> = [];
+
+  for(const fn of res.functionCalls) {
+    const toolRes = await executeTool(fn);
+    await ch.send(`-# Calling function "${fn.name}"...`);
+    fnRes.push({
+      functionResponse: {
+        name: fn.name,
+        response: toolRes ? (
+          toolRes[0] ? toolRes[1] : { error: `ツールの実行中にエラーが発生しました` }
+        ) : { error: `ツール (ツール名: ${fn.name}) は存在しません` },
+      },
+    });
+  }
+
+  return [false, {
+    message: fnRes,
+  }];
+};
+
+const processAIGenError = (e: unknown) => ({
+  text: 'An error occurred while generating the response.\n```ts\n'
+    + (e instanceof Error ? `${e.name}: ${e.message}` : String(e)) + '\n```',
+} as GenerateContentResponse);
 
 client.on('messageCreate', async m => {
   if(!m.author.bot && m.mentions.users.has(client.user!.id) && await db.inArray('aichannels', m.channelId)) {
@@ -195,7 +259,8 @@ client.on('messageCreate', async m => {
             return {
               name: t[0],
               description: t[1]['description'],
-              parameters: t[1]['parameters'] as any as GenAISchema, // FIXME
+              parametersJsonSchema: t[1]['parametersJsonSchema'] as any as GenAISchema, // FIXME
+              responseJsonSchema: t[1]['responseJsonSchema'] as any as GenAISchema, // FIXME
             }
           }) }],
         },
@@ -208,17 +273,34 @@ client.on('messageCreate', async m => {
       m.channel.sendTyping();
     // });
 
-    const res: GenerateContentResponse = await chat.sendMessage({
+    let res: GenerateContentResponse = await chat.sendMessage({
       message: m.content,
-    }).catch(e => {
-      return {
-        text: '```ts\nAn error occurred while generating the response.\n'
-          + (e instanceof Error ? `${e.name}: ${e.message}` : String(e)) + '\n```',
-      } as GenerateContentResponse;
-    });
-    // clearInterval(intervalId);
+    }).catch(processAIGenError);
 
-    m.reply(`${res.text}${res.text?.endsWith('\n') ? '' : '\n'}-# model: gemini-2.0-flash-lite`);
+    let ret = await processAIResponse(res, m.channel);
+
+    if(ret[0] === false) {
+      let genLoopCount = 0;
+      let genDone = false;
+
+      while(genLoopCount < 25) {
+        ++genLoopCount;
+        res = await chat.sendMessage(ret[1]).catch(processAIGenError);
+        ret = await processAIResponse(res, m.channel);
+        if(ret[0]) {
+          genDone = true;
+          break;
+        }
+      }
+      if(!genDone) {
+        res = {
+          text: `rejected: generation loop limit reached.`,
+        } as GenerateContentResponse
+      }
+    }
+
+    // clearInterval(intervalId);
+    await m.reply(`${res.text}${res.text?.endsWith('\n') ? '' : '\n'}-# model: gemini-2.0-flash-lite`);
   }
 });
 
