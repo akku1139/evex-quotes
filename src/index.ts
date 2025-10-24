@@ -16,8 +16,6 @@ const commandLogger = new Logger('commands');
 const aiLogger = new Logger('ai');
 const nodeLogger = new Logger('node');
 
-// error handling
-
 process.on('unhandledRejection', (reason, _promise) => {
   nodeLogger.error(String(reason));
 });
@@ -100,6 +98,10 @@ const client = new Client({ intents: [
   GatewayIntentBits.MessageContent,
   GatewayIntentBits.GuildMembers,
 ] });
+
+client.on('error', async err => {
+  mainLogger.error(err.stack ?? err.name + '\n' + err.message);
+});
 
 client.on('ready', readyClient => {
   mainLogger.info(`Logged in as ${readyClient.user.tag}!`);
