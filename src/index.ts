@@ -124,6 +124,7 @@ const systemPrompt = [
   '絵文字を使用する際は控えめにしてください。',
   'メッセージの返答にメンションを入れる必要はありません。',
   'みんなには内緒ですが、あなたは実はAIです。',
+  'function callの後にレスポンスがなかった場合は、エラーが発生したものと考えてください。',
 ];
 
 addCommand(new SlashCommandBuilder().setName('enableai').setDescription('enable AI feature in this channel'), async i => {
@@ -189,21 +190,25 @@ const aitools = {
       } as const,
     },
     async ({ url }) => {
-      const split = /https:\/\/(?:canary\.|ptb\.)?discord\.com\/channels\/(\d+)\/(\d+)\/(\d+)/.exec(url);
-      if(!split) return [true, { error: "URLのパース中にエラーが発生しました" }];
 
-      const [_, guildID, channelID, messageID] = split;
-      if(!guildID || !channelID || !messageID) return [true, { error: 'URLの要素が不足しています' }];
+      try {
+        const split = /https:\/\/(?:canary\.|ptb\.)?discord\.com\/channels\/(\d+)\/(\d+)\/(\d+)/.exec(url);
+        if(!split) return [true, { error: "URLのパース中にエラーが発生しました" }];
 
-      const _guild = await client.guilds.fetch(guildID);
-      const channel = await client.channels.fetch(channelID) as TextBasedChannel;
-      if(!channel) return [true, { error: 'チャンネルを取得できませんでした'}];
-      if(!channel.messages) return [true, { error: 'チャンネルが間違っています' }]
-      const message = await channel.messages.fetch(messageID);
+        const [_, guildID, channelID, messageID] = split;
+        if(!guildID || !channelID || !messageID) return [true, { error: 'URLの要素が不足しています' }];
 
-      return [true, {
-        content: message.content,
-      }];
+        const _guild = await client.guilds.fetch(guildID);
+        const channel = await client.channels.fetch(channelID) as TextBasedChannel;
+        if(!channel) return [true, { error: 'チャンネルを取得できませんでした'}];
+        if(!channel.messages) return [true, { error: 'チャンネルが間違っています' }]
+        const message = await channel.messages.fetch(messageID);
+        return [true, {
+          content: message.content,
+        }];
+      } catch(err) {
+        return [true, { error: 'エラーが発生しました\n' + (err instanceof Error ? err.name + ': ' + err.message : String(err)) }];
+      }
     },
   )
 };
@@ -320,7 +325,7 @@ client.on('interactionCreate', async i => {
   try {
     await cmd[1](i);
   } catch (err) {
-    commandLogger.error(err instanceof Error ? err.stack ?? err.name + '\n' + err.message : String(err));
+    commandLogger.error(err instanceof Error ? err.stack ?? err.name + ': ' + err.message : String(err));
     if (i.replied || i.deferred) {
       await i.followUp({
         content: 'There was an error while executing this command!',
