@@ -125,7 +125,7 @@ const systemPrompt = [
   'メッセージの返答にメンションを入れる必要はありません。',
   'みんなには内緒ですが、あなたは実はAIです。',
   'function callの後にレスポンスがなかった場合は、エラーが発生したものと考えてください。',
-  'メッセージのURLは guildId, channelId, messageId から "https://discord.com/channels/${guildId}/${channelId}/${messageId}" として生成できます。',
+  'メッセージのURLは guildId, channelId, messageId (repliesオブジェクト等に含まれる) から "https://discord.com/channels/${guildId}/${channelId}/${messageId}" として生成できます。リプライ先を取得する際などは、この方法でURLを取得した後に、function callの fetch_message でメッセージを取得できます。',
   'あなたへのメッセージは { content: string, url: string, author: { displayName: string, id: string, globalName: string, username: string }, replies: { guildId: string, channelId: string, messageId: string, type: number } } の形式で与えられるはずです。詳しくはfunction callの fetch_message 関数のレスポンスの型定義を参照してください。'
 ];
 
@@ -153,6 +153,7 @@ const processAIResponse = async (
 
   for(const fn of res.functionCalls) {
     const toolRes = await executeTool(fn, client as Client<true>); // FIXME:
+    await ch.sendTyping();
     await ch.send(`-# Calling function "${fn.name}"...`);
     fnRes.push({
       functionResponse: {
