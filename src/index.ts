@@ -7,7 +7,7 @@ import { Mutex } from './mutex.ts';
 import { getEnv } from './utils.ts';
 import { Logger } from './logger.ts';
 import process from 'node:process';
-import { aitools, executeTool } from './tool.ts';
+import { aitools, executeTool } from './aitool.ts';
 
 // init log
 
