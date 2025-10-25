@@ -129,7 +129,7 @@ const systemPrompt = [
   'メッセージのURLは guildId, channelId, messageId (repliesオブジェクト等に含まれる) から "https://discord.com/channels/${guildId}/${channelId}/${messageId}" として生成できます。リプライ先を取得する際などは、この方法でURLを取得した後に、function call: fetch_message でメッセージを取得できます。',
   `あなたへのメッセージはJSON形式で、次のJSON Schema \`${JSON.stringify(discordMessageSchema)}\` の形式で与えられるはずです。`,
   '特に言及がない限り、タイムゾーンはJSTを使用してください。',
-  'メッセージ履歴をまとめたい場合などは function call: fetch_messages_history を使って複数のメッセージを取得してみてください。'
+  'メッセージ履歴をまとめたい場合などは function call: fetch_messages_history を使って複数のメッセージを取得してみてください。メッセージ取得個数は聞き返さずに、雰囲気でいい感じに指定してください。'
 ];
 
 addCommand(new SlashCommandBuilder().setName('enableai').setDescription('enable AI feature in this channel'), async i => {
