@@ -179,11 +179,13 @@ const processAIGenError = (e: unknown) => ({
     + (e instanceof Error ? `${e.name}: ${e.message}` : String(e)) + '\n```',
 } as GenerateContentResponse);
 
+const model = 'gemini-2.5-flash-lite';
+
 client.on('messageCreate', async m => {
   if(!m.author.bot && m.mentions.users.has(client.user!.id) && await db.inArray('aichannels', m.channelId)) {
     const chat: Chat = aichats.get(m.channelId) ?? (() => {
       const newChat = genai.chats.create({
-        model: 'gemini-2.0-flash-lite',
+        model,
         config: {
           systemInstruction: systemPrompt,
           tools: [{ functionDeclarations: Object.entries(aitools).map(t => {
@@ -232,7 +234,7 @@ client.on('messageCreate', async m => {
     }
 
     // clearInterval(intervalId);
-    await m.reply(`${res.text}${res.text?.endsWith('\n') ? '' : '\n'}-# model: gemini-2.0-flash-lite`);
+    await m.reply(`${res.text}${res.text?.endsWith('\n') ? '' : '\n'}-# model: ${model}`);
   }
 });
 
