@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { JSONSchema, FromSchema } from 'json-schema-to-ts'
+import type { JSONSchema, FromSchema } from 'json-schema-to-ts'
 
 export const DiscordMessageSchema = {
   type: 'object',

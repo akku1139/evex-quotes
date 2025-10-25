@@ -9,7 +9,6 @@ import { Logger } from './logger.ts';
 import process from 'node:process';
 import { aitools, executeTool } from './aitool.ts';
 import { DiscordMessageSchema } from './schemas.ts';
-import { FromSchema } from 'json-schema-to-ts';
 
 // init log
 

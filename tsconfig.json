@@ -9,5 +9,7 @@
     "skipLibCheck": true,
     "types": ["node"],
     "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
   }
 }
