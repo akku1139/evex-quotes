@@ -12,7 +12,7 @@ export default defineAITool(
         title: { type: 'string', description: 'ページタイトル' },
         // lang: { type: 'string', description: 'Wikipediaの言語' }
       },
-      required: ['query'],
+      required: ['title'],
     },
     responseJsonSchema: {
       // type: 'object',
