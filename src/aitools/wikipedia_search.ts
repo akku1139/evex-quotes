@@ -14,17 +14,17 @@ export default defineAITool(
       required: ['query'],
     },
     responseJsonSchema: {
-      type: 'object',
-      properties: {
-        batchcomplete: { type: 'string' },
-        continue: {
-          type: 'object',
-          properties: {
-            sroffset: { type: 'number' },
-            continue: { type: 'string' },
-          },
-        },
-        query: {
+      // type: 'object',
+      // properties: {
+      //   batchcomplete: { type: 'string' },
+      //   continue: {
+      //     type: 'object',
+      //     properties: {
+      //       sroffset: { type: 'number' },
+      //       continue: { type: 'string' },
+      //     },
+      //   },
+      //   query: {
           type: 'object',
           properties: {
             searchinfo: {
@@ -46,8 +46,8 @@ export default defineAITool(
                 },
               },
             },
-          },
-        },
+
+        // },
       },
     },
   } as const,
@@ -63,7 +63,7 @@ export default defineAITool(
     );
 
     if(!res.ok) return [false, { error: `HTTPステータスコード: ${res.status} (${res.statusText})` }];
-    return [true, { html: await res.json() as any }];
+    return [true, { html: (await res.json() as any)['query'] }];
   },
 );
 
