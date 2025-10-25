@@ -30,7 +30,7 @@ export default defineAITool(
       const _guild = await client.guilds.fetch(guildID);
       const channel = await client.channels.fetch(channelID) as TextBasedChannel;
       if(!channel) return [false, { error: 'チャンネルを取得できませんでした'}];
-      if(!channel.messages) return [false, { error: 'チャンネルが間違っています' }]
+      if(!channel.messages) return [false, { error: 'チャンネルが間違っています' }];
       const message = await channel.messages.fetch(messageID);
       return [true, await discordMessageToAISchema(message)];
     } catch(err) {
