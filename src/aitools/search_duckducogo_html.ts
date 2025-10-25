@@ -35,7 +35,7 @@ export default defineAITool(
       method: 'POST',
     });
 
-    if(!res.ok) return [true, { error: `HTTPステータスコード: ${res.status} (${res.statusText})` }];
+    if(!res.ok) return [false, { error: `HTTPステータスコード: ${res.status} (${res.statusText})` }];
     return [true, { html: await res.text() }];
   },
 );

@@ -4,14 +4,13 @@ import { type Client } from 'discord.js';
 import type { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
 export const defineAITool = <
-  N extends string,
   P extends Readonly<JSONSchema>,
   R extends Readonly<JSONSchema>,
   PT = FromSchema<P>,
-  RT = FromSchema<R>
+  RT = FromSchema<R>,
 >(
   data: { description: string, parametersJsonSchema: P, responseJsonSchema: R },
-  execute: (args: PT, client: Client<true>) => Promise<[true, RT] | [true, { error: string }] | [false]>
+  execute: (args: PT, client: Client<true>) => Promise<[true, RT] | [false, { error: string }] | [false]>, // FIXME: returntype is not strict...?
 ) => ({
   ...data,
   responseJsonSchema: {

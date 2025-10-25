@@ -4,10 +4,12 @@ import { Client, GatewayIntentBits, type Snowflake, SlashCommandBuilder, type Ap
 import fs from 'node:fs/promises';
 import { type Chat, type GenerateContentResponse, GoogleGenAI, type Schema as GenAISchema, type SendMessageParameters, type Part as GenAIPart } from '@google/genai';
 import { Mutex } from './mutex.ts';
-import { getEnv } from './utils.ts';
+import { discordMessageToAISchema, getEnv } from './utils.ts';
 import { Logger } from './logger.ts';
 import process from 'node:process';
 import { aitools, executeTool } from './aitool.ts';
+import { DiscordMessageSchema } from './schemas.ts';
+import { FromSchema } from 'json-schema-to-ts';
 
 // init log
 
@@ -127,7 +129,8 @@ const systemPrompt = [
   '"function callの関数" の略として func:xxxx と言う場合があります。',
   'function callの後にレスポンスがなかった場合は、エラーが発生したものと考えてください。',
   'メッセージのURLは guildId, channelId, messageId (repliesオブジェクト等に含まれる) から "https://discord.com/channels/${guildId}/${channelId}/${messageId}" として生成できます。リプライ先を取得する際などは、この方法でURLを取得した後に、func:fetch_message でメッセージを取得できます。',
-  'あなたへのメッセージは { content: string, url: string, author: { displayName: string, id: string, globalName: string, username: string }, replies: { guildId: string, channelId: string, messageId: string, type: number } } の形式で与えられるはずです。詳しくは func:fetch_message のレスポンスの型定義を参照してください。'
+  `あなたへのメッセージはJSON形式で、次のJSON Schema \`${JSON.stringify(DiscordMessageSchema)}\` の形式で与えられるはずです。`,
+  '特に言及がない限り、タイムゾーンはJSTを使用してください。',
 ];
 
 addCommand(new SlashCommandBuilder().setName('enableai').setDescription('enable AI feature in this channel'), async i => {
@@ -203,17 +206,7 @@ client.on('messageCreate', async m => {
 
     let res: GenerateContentResponse = await chat.sendMessage({
       // message: m.content,
-      message: JSON.stringify({
-        content: m.content,
-        url: m.url,
-        author: {
-          displayName: m.author.displayName,
-          id: m.author.id,
-          globalName: m.author.globalName,
-          username: m.author.username,
-        },
-        replies: m.reference,
-      }),
+      message: JSON.stringify(await discordMessageToAISchema(m)),
     }).catch(processAIGenError);
 
     let ret = await processAIResponse(res, m.channel);

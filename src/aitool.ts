@@ -12,9 +12,11 @@ export const aitools = {
 
 const allAiTools = Object.keys(aitools) as Array<keyof typeof aitools>;
 
-export const executeTool = async (fn: FunctionCall, client: Client<true>) => {
+export const executeTool = async (fn: FunctionCall, client: Client<true>): Promise<undefined | [boolean] | [boolean, Record<string, unknown>]> => {
   if(!allAiTools.includes(fn.name as any)) return;
   const name = fn.name as keyof typeof aitools;
   const execute = aitools[name].execute;
-  return await execute(fn.args as any, client);
+  const res = await execute(fn.args as any, client);
+  if(res[1] !== void 0) return [true, res[1]];
+  return [false];
 };
