@@ -57,3 +57,11 @@ export const discordMessageToAISchema = async (m: Message): Promise<DiscordMessa
     } : void 0,
   };
 };
+
+export const getCounter = () => {
+  let count = 0;
+  return {
+    inc() { ++count; },
+    get() { return count},
+  };
+};

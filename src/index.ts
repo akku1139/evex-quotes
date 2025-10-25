@@ -2,7 +2,7 @@
 
 import { Client, GatewayIntentBits, type Snowflake, SlashCommandBuilder, type ApplicationCommandDataResolvable, MessageFlags, type ChatInputCommandInteraction, type OmitPartialGroupDMChannel, type Message } from 'discord.js';
 import { type Chat, type GenerateContentResponse, GoogleGenAI, type Schema as GenAISchema, type SendMessageParameters, type Part as GenAIPart } from '@google/genai';
-import { discordMessageToAISchema, getEnv } from './utils.ts';
+import { discordMessageToAISchema, getCounter, getEnv } from './utils.ts';
 import { Logger } from './logger.ts';
 import process from 'node:process';
 import { aitools, executeTool } from './aitool.ts';
@@ -93,6 +93,7 @@ const aichats: Map<Snowflake, Chat> = new Map();
 const processAIResponse = async (
   res: GenerateContentResponse,
   msg: OmitPartialGroupDMChannel<Message>,
+  fnCounter: ReturnType<typeof getCounter>,
 ):
   Promise<[true]
         | [false, SendMessageParameters]> => {
@@ -101,6 +102,15 @@ const processAIResponse = async (
   const fnRes: Array<GenAIPart> = [];
 
   for(const fn of res.functionCalls) {
+    if(fnCounter.get() > 30) {
+      fnRes.push({
+        functionResponse: {
+          name: fn.name,
+          response: { error: 'ツールの実行回数上限を超えました' },
+        },
+      });
+      break;
+    }
     const toolRes = await executeTool(fn, client as Client<true>, msg); // FIXME:
     await msg.channel.sendTyping();
     await msg.channel.send(`-# Calling function "${fn.name}"...`);
@@ -108,10 +118,11 @@ const processAIResponse = async (
       functionResponse: {
         name: fn.name,
         response: toolRes ? (
-          toolRes[0] ? toolRes[1] : { error: `ツールの実行中にエラーが発生しました` }
-        ) : { error: `ツール (ツール名: ${fn.name}) は存在しません` },
+          toolRes[0] ? toolRes[1] : { error: 'functionの実行中にエラーが発生しました' }
+        ) : { error: `function: ${fn.name} は存在しません` },
       },
     });
+    fnCounter.inc();
   }
 
   return [false, {
@@ -156,16 +167,21 @@ client.on('messageCreate', async m => {
       message: JSON.stringify(await discordMessageToAISchema(m)),
     }).catch(processAIGenError);
 
-    let ret = await processAIResponse(res, m);
+    const fnCounter = getCounter();
+
+    let ret = await processAIResponse(res, m, fnCounter);
 
     if(ret[0] === false) {
       let genLoopCount = 0;
       let genDone = false;
 
       while(genLoopCount < 10) {
+        if(fnCounter.get() > 30) {
+          break;
+        }
         ++genLoopCount;
         res = await chat.sendMessage(ret[1]).catch(processAIGenError);
-        ret = await processAIResponse(res, m);
+        ret = await processAIResponse(res, m, fnCounter);
         if(ret[0]) {
           genDone = true;
           break;
