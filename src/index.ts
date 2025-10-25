@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { Client, GatewayIntentBits, type Snowflake, SlashCommandBuilder, type ApplicationCommandDataResolvable, MessageFlags, type ChatInputCommandInteraction, type OmitPartialGroupDMChannel, type Message } from 'discord.js';
-import fs from 'node:fs/promises';
 import { type Chat, type GenerateContentResponse, GoogleGenAI, type Schema as GenAISchema, type SendMessageParameters, type Part as GenAIPart } from '@google/genai';
-import { Mutex } from './mutex.ts';
 import { discordMessageToAISchema, getEnv } from './utils.ts';
 import { Logger } from './logger.ts';
 import process from 'node:process';
 import { aitools, executeTool } from './aitool.ts';
 import { discordMessageSchema } from './schemas.ts';
+import { db } from './db.ts';
 
 // init log
 
@@ -21,63 +20,6 @@ process.on('unhandledRejection', (reason, _promise) => {
   nodeLogger.error(String(reason));
 });
 
-// init db
-
-type PickArrays<T> = {
-  [K in keyof T as T[K] extends any[] ? K : never]: T[K];
-};
-type ArrayElement<A> = A extends readonly (infer E)[] ? E : never;
-
-const db = await (async () => {
-  type DB = {
-    aichannels: Array<Snowflake>
-  };
-
-  const dbPath = './data.json';
-
-  const lock = new Mutex();
-
-  let data = JSON.parse((await fs.readFile(dbPath)).toString()) as DB;
-
-  // must be used in lock.job
-  const sync = async () => await fs.writeFile(dbPath, JSON.stringify(data));
-
-  return {
-    async reset() {
-      await lock.job(async () => {
-        data = {
-          aichannels: [],
-        };
-        await sync();
-      });
-    },
-
-    async get<P extends keyof DB>(path: P) {
-      return await lock.job(async () => {
-        return data[path];
-      });
-    },
-    async set<P extends keyof DB>(path: P, newData: DB[P]) {
-      return await lock.job(async () => {
-        data[path] = newData;
-        await sync();
-      });
-    },
-
-    async inArray<P extends keyof PickArrays<DB>>(path: P, target: ArrayElement<DB[P]>) {
-      return await lock.job(async () => {
-        return data[path].includes(target);
-      });
-    },
-    async pushArray<P extends keyof PickArrays<DB>>(path: P, newData: ArrayElement<DB[P]>) {
-      return await lock.job(async () => {
-        const res = data[path].push(newData);
-        await sync();
-        return res;
-      })
-    }
-  }
-})();
 
 // init gemini
 
@@ -220,7 +162,7 @@ client.on('messageCreate', async m => {
       let genLoopCount = 0;
       let genDone = false;
 
-      while(genLoopCount < 25) {
+      while(genLoopCount < 10) {
         ++genLoopCount;
         res = await chat.sendMessage(ret[1]).catch(processAIGenError);
         ret = await processAIResponse(res, m);
