@@ -13,7 +13,7 @@ export default defineAITool(
     parametersJsonSchema: {
       type: 'object',
       properties: {
-        url: { type: 'string', description: '起点のメッセージURL (デフォルトでは現在のチャンネルの最後のメッセージ)' },
+        url: { type: 'string', description: '起点のメッセージ、またはチャンネルのURL (デフォルトでは現在のチャンネルの最後のメッセージ)' },
         limit: { type: 'number', description: '取得するメッセージの個数', default: 30 },
         mode: {
           type: 'string',
@@ -33,21 +33,22 @@ export default defineAITool(
   async ({ url, limit, mode }, { client, msg }) => {
     try {
       let channel: TextBasedChannel = msg.channel;
-      let messageID = msg.id;
+      let tMessageID = msg.id;
       if(url !== void 0) {
         const split = /https:\/\/(?:canary\.|ptb\.)?discord\.com\/channels\/(\d+)\/(\d+)\/(\d+)/.exec(url);
         if(!split) return [false, { error: "URLのパース中にエラーが発生しました" }];
 
         const [_, guildID, channelID, messageID] = split;
-        if(!guildID || !channelID || !messageID) return [false, { error: 'URLの要素が不足しています' }];
+        if(!guildID || !channelID) return [false, { error: 'URLの要素が不足しています' }];
 
         const _guild = await client.guilds.fetch(guildID);
         channel = await client.channels.fetch(channelID) as TextBasedChannel;
         if(!channel) return [false, { error: 'チャンネルを取得できませんでした'}];
         if(!channel.messages) return [false, { error: 'チャンネルが間違っています' }];
+        if(messageID !== void 0) tMessageID = messageID;
       }
       const messages = await channel.messages.fetch({
-        ...{ [mode ?? 'around']: messageID },
+        ...{ [mode ?? 'around']: tMessageID },
         cache: false,
         limit: limit ?? 30,
       });
