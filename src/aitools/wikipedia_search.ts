@@ -63,7 +63,7 @@ export default defineAITool(
     );
 
     if(!res.ok) return [false, { error: `HTTPステータスコード: ${res.status} (${res.statusText})` }];
-    return [true, { html: (await res.json() as any)['query'] }];
+    return [true, (await res.json() as any)['query'] ];
   },
 );
 

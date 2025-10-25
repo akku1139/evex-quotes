@@ -15,13 +15,13 @@ export default defineAITool(
       required: ['query'],
     },
     responseJsonSchema: {
-      type: 'object',
-      properties: {
-        batchcomplete: { type: 'string' },
-        query: {
-          type: 'object',
-          properties: {
-            pages: {
+      // type: 'object',
+      // properties: {
+      //   batchcomplete: { type: 'string' },
+      //   query: {
+      //     type: 'object',
+      //     properties: {
+      //       pages: {
               type: 'object',
               patternProperties: {
                 "^.*$": {
@@ -35,10 +35,10 @@ export default defineAITool(
                   },
                 },
               },
-            },
-          },
-        },
-      },
+            // },
+          // },
+        // },
+      // },
     },
   } as const,
   async ({ title }) => {
@@ -53,7 +53,7 @@ export default defineAITool(
     );
 
     if(!res.ok) return [false, { error: `HTTPステータスコード: ${res.status} (${res.statusText})` }];
-    return [true, { html: await res.json() as any }];
+    return [true, (await res.json() as any)['query']['pages'] ];
   },
 );
 
