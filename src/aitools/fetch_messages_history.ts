@@ -15,16 +15,18 @@ export default defineAITool(
       properties: {
         url: { type: 'string', description: '起点のメッセージURL (デフォルトでは現在のチャンネルの最後のメッセージ)' },
         limit: { type: 'number', description: '取得するメッセージの個数', default: 30 },
-        mode: { type: 'string', enum: ['after', 'before', 'around'], description: 'メッセージ取得モード。指定したメッセージから (after: 新しい, before: 古い, around: 周辺) を取得します。', default: 'around' },
+        mode: {
+          type: 'string',
+          enum: ['after', 'before', 'around'],
+          description: 'メッセージ取得モード。指定したメッセージから (after: 新しい, before: 古い, around: 周辺) を取得します。',
+          default: 'around',
+        },
       },
     } as const,
     responseJsonSchema: {
       type: 'object',
       properties: {
-        messages: {
-          type: 'array',
-          items: discordMessageSchema,
-        }
+        '.+': discordMessageSchema,
       },
       required: ['messages'],
     },
@@ -46,11 +48,11 @@ export default defineAITool(
         if(!channel.messages) return [false, { error: 'チャンネルが間違っています' }];
       }
       const messages = await channel.messages.fetch({
-        ...{ [mode]: messageID },
+        ...{ [mode ?? 'around']: messageID },
         cache: false,
-        limit,
+        limit: limit ?? 30,
       });
-      return [true, await Promise.all(messages.map(async message => await discordMessageToAISchema(message)))];
+      return [true, Object.fromEntries(await Promise.all(messages.map(async message => [message.id, await discordMessageToAISchema(message)])))];
     } catch(err) {
       return [false, { error: 'エラーが発生しました\n' + (err instanceof Error ? err.name + ': ' + err.message : String(err)) }];
     }
