@@ -46,7 +46,7 @@ export const discordMessageToAISchema = async (m: Message): Promise<DiscordMessa
       id: m.author.id,
       globalName: m.author.globalName ?? m.author.displayName,
       username: m.author.username,
-      type: m.author.bot,
+      bot: m.author.bot,
       // TODO: primaryGuild
     },
     replies: m.reference ? {
