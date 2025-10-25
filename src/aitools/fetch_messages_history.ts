@@ -35,10 +35,10 @@ export default defineAITool(
       let channel: TextBasedChannel = msg.channel;
       let tMessageID = msg.id;
       if(url !== void 0) {
-        const split = /https:\/\/(?:canary\.|ptb\.)?discord\.com\/channels\/(\d+)\/(\d+)\/(\d+)/.exec(url);
+        const split = /https:\/\/(?:canary\.|ptb\.)?discord\.com\/channels\/(\d+)\/(\d+)(\/(\d+))/.exec(url);
         if(!split) return [false, { error: "URLのパース中にエラーが発生しました" }];
 
-        const [_, guildID, channelID, messageID] = split;
+        const [_0, guildID, channelID, _1, messageID] = split;
         if(!guildID || !channelID) return [false, { error: 'URLの要素が不足しています' }];
 
         const _guild = await client.guilds.fetch(guildID);
