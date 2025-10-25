@@ -3,7 +3,6 @@
 import { discordMessageSchema } from '../schemas.ts';
 import { discordMessageToAISchema } from '../utils.ts';
 import { defineAITool } from './common.ts';
-import { type TextBasedChannel } from 'discord.js';
 
 // TODO: Support reactions
 
@@ -25,6 +24,17 @@ export default defineAITool(
     } as const,
     responseJsonSchema: {
       type: 'object',
+      description: '名前が数字(Message ID)で始まるプロパティはメッセージの内容、そうでないものは個別に説明があります。',
+      properties: {
+        channel: {
+          type: 'object',
+          description: 'メッセージが送信されたチャンネルに関する情報です。',
+          properties: {
+            id: { type: 'string', description: 'チャンネルID' },
+            name: { type: 'string', description: 'チャンネル名' },
+          },
+        }
+      },
       patternProperties: {
         '^.*$': discordMessageSchema,
       },
@@ -32,7 +42,7 @@ export default defineAITool(
   },
   async ({ url, limit, mode }, { client, msg }) => {
     try {
-      let channel: TextBasedChannel = msg.channel;
+      let channel = msg.channel;
       let tMessageID = msg.id;
       if(url !== void 0) {
         const split = /https:\/\/(?:canary\.|ptb\.)?discord\.com\/channels\/(\d+)\/(\d+)(\/(\d+))/.exec(url);
@@ -49,7 +59,7 @@ export default defineAITool(
           channelID = lChannelID;
           tMessageID = messageID;
         }
-        channel = await client.channels.fetch(channelID) as TextBasedChannel;
+        channel = await client.channels.fetch(channelID) as (typeof msg)['channel'];
         if(!channel) return [false, { error: 'チャンネルを取得できませんでした'}];
         if(!channel.messages) return [false, { error: 'チャンネルが間違っています' }];
       }
@@ -58,9 +68,15 @@ export default defineAITool(
         cache: false,
         limit: limit ?? 30,
       });
-      return [true, Object.fromEntries(
-        await Promise.all(messages.map(async message => [message.id, await discordMessageToAISchema(message)]))
-      )];
+      return [true, {
+        ...Object.fromEntries(
+          await Promise.all(messages.map(async message => [message.id, await discordMessageToAISchema(message)]))
+        ),
+        channel: {
+          id: channel.id,
+          name: (channel as any).name,
+        },
+      }];
     } catch(err) {
       return [false, { error: 'エラーが発生しました\n' + (err instanceof Error ? err.name + ': ' + err.message : String(err)) }];
     }
