@@ -8,7 +8,7 @@ import { discordMessageToAISchema, getEnv } from './utils.ts';
 import { Logger } from './logger.ts';
 import process from 'node:process';
 import { aitools, executeTool } from './aitool.ts';
-import { DiscordMessageSchema } from './schemas.ts';
+import { discordMessageSchema } from './schemas.ts';
 
 // init log
 
@@ -128,8 +128,9 @@ const systemPrompt = [
   '"function callの関数" の略として func:xxxx と言う場合があります。',
   'function callの後にレスポンスがなかった場合は、エラーが発生したものと考えてください。',
   'メッセージのURLは guildId, channelId, messageId (repliesオブジェクト等に含まれる) から "https://discord.com/channels/${guildId}/${channelId}/${messageId}" として生成できます。リプライ先を取得する際などは、この方法でURLを取得した後に、func:fetch_message でメッセージを取得できます。',
-  `あなたへのメッセージはJSON形式で、次のJSON Schema \`${JSON.stringify(DiscordMessageSchema)}\` の形式で与えられるはずです。`,
+  `あなたへのメッセージはJSON形式で、次のJSON Schema \`${JSON.stringify(discordMessageSchema)}\` の形式で与えられるはずです。`,
   '特に言及がない限り、タイムゾーンはJSTを使用してください。',
+  'メッセージ履歴をまとめたい場合などは func:fetch_messages_history を使って複数のメッセージを取得してみてください。'
 ];
 
 addCommand(new SlashCommandBuilder().setName('enableai').setDescription('enable AI feature in this channel'), async i => {
@@ -146,7 +147,7 @@ const aichats: Map<Snowflake, Chat> = new Map();
 
 const processAIResponse = async (
   res: GenerateContentResponse,
-  ch: OmitPartialGroupDMChannel<Message>['channel'],
+  msg: OmitPartialGroupDMChannel<Message>,
 ):
   Promise<[true]
         | [false, SendMessageParameters]> => {
@@ -155,9 +156,9 @@ const processAIResponse = async (
   const fnRes: Array<GenAIPart> = [];
 
   for(const fn of res.functionCalls) {
-    const toolRes = await executeTool(fn, client as Client<true>); // FIXME:
-    await ch.sendTyping();
-    await ch.send(`-# Calling function "${fn.name}"...`);
+    const toolRes = await executeTool(fn, client as Client<true>, msg); // FIXME:
+    await msg.channel.sendTyping();
+    await msg.channel.send(`-# Calling function "${fn.name}"...`);
     fnRes.push({
       functionResponse: {
         name: fn.name,
@@ -208,7 +209,7 @@ client.on('messageCreate', async m => {
       message: JSON.stringify(await discordMessageToAISchema(m)),
     }).catch(processAIGenError);
 
-    let ret = await processAIResponse(res, m.channel);
+    let ret = await processAIResponse(res, m);
 
     if(ret[0] === false) {
       let genLoopCount = 0;
@@ -217,7 +218,7 @@ client.on('messageCreate', async m => {
       while(genLoopCount < 25) {
         ++genLoopCount;
         res = await chat.sendMessage(ret[1]).catch(processAIGenError);
-        ret = await processAIResponse(res, m.channel);
+        ret = await processAIResponse(res, m);
         if(ret[0]) {
           genDone = true;
           break;

@@ -2,7 +2,7 @@
 
 import type { JSONSchema, FromSchema } from 'json-schema-to-ts'
 
-export const DiscordMessageSchema = {
+export const discordMessageSchema = {
   type: 'object',
   properties: {
     content: { type: 'string', description: 'メッセージの内容' },
@@ -31,4 +31,4 @@ export const DiscordMessageSchema = {
   },
   required: ['content', 'url', 'timestamp', 'author'],
 } as const satisfies JSONSchema;
-export type DiscordMessageSchema = FromSchema<typeof DiscordMessageSchema>;
+export type DiscordMessageResponse = FromSchema<typeof discordMessageSchema>;

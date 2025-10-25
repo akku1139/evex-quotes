@@ -2,7 +2,7 @@
 
 import { Message } from 'discord.js';
 import process from 'node:process';
-import { DiscordMessageSchema } from './schemas.ts';
+import type { DiscordMessageResponse } from './schemas.ts';
 
 export const getEnv = (name: string) => {
   const v = process.env[name];
@@ -36,7 +36,7 @@ export const formatJSTDate = (date: Date) => {
   return `${formattedDateTime} ${timeZoneOffset}`;
 };
 
-export const discordMessageToAISchema = async (m: Message): Promise<DiscordMessageSchema> => {
+export const discordMessageToAISchema = async (m: Message): Promise<DiscordMessageResponse> => {
   return {
     content: m.content,
     url: m.url,

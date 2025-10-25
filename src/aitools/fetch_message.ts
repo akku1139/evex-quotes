@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { DiscordMessageSchema } from '../schemas.ts';
+import { discordMessageSchema } from '../schemas.ts';
 import { discordMessageToAISchema } from '../utils.ts';
 import { defineAITool } from './common.ts';
 import { type TextBasedChannel } from 'discord.js';
@@ -17,9 +17,9 @@ export default defineAITool(
       },
       required: ['url'],
     } as const,
-    responseJsonSchema: DiscordMessageSchema,
+    responseJsonSchema: discordMessageSchema,
   },
-  async ({ url }, client) => {
+  async ({ url }, { client }) => {
     try {
       const split = /https:\/\/(?:canary\.|ptb\.)?discord\.com\/channels\/(\d+)\/(\d+)\/(\d+)/.exec(url);
       if(!split) return [false, { error: "URLのパース中にエラーが発生しました" }];

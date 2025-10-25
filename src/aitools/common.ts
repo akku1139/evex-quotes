@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { type Client } from 'discord.js';
+import { Message, type Client } from 'discord.js';
 import type { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
 export const defineAITool = <
@@ -10,7 +10,10 @@ export const defineAITool = <
   RT = FromSchema<R>,
 >(
   data: { description: string, parametersJsonSchema: P, responseJsonSchema: R },
-  execute: (args: PT, client: Client<true>) => Promise<[true, RT] | [false, { error: string }] | [false]>, // FIXME: returntype is not strict...?
+  execute: (
+    args: PT,
+    meta: { client: Client<true>, msg: Message }
+  ) => Promise<[true, RT] | [false, { error: string }] | [false]>, // FIXME: returntype is not strict...?
 ) => ({
   ...data,
   responseJsonSchema: {
