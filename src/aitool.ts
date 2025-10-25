@@ -4,11 +4,15 @@ import { Message, type Client } from 'discord.js';
 import { type FunctionCall } from '@google/genai';
 import fetch_message from './aitools/fetch_message.ts'
 import fetch_messages_history from './aitools/fetch_messages_history.ts';
+import wikipedia_search from './aitools/wikipedia_search.ts';
+import wikipedia_read from './aitools/wikipedia_read.ts';
 // import search_duckduckgo_html from './aitools/search_duckducogo_html.ts'
 
 export const aitools = {
   fetch_message,
   fetch_messages_history,
+  wikipedia_search,
+  wikipedia_read
   // search_duckduckgo_html,
 } as const;
 

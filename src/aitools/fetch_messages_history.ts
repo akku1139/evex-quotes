@@ -25,7 +25,7 @@ export default defineAITool(
     } as const,
     responseJsonSchema: {
       type: 'object',
-      properties: {
+      patternProperties: {
         '^.*$': discordMessageSchema,
       },
     },
