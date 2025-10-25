@@ -45,7 +45,7 @@ export default defineAITool(
       let channel = msg.channel;
       let tMessageID = msg.id;
       if(url !== void 0) {
-        const split = /https:\/\/(?:canary\.|ptb\.)?discord\.com\/channels\/(\d+)\/(\d+)(\/(\d+))/.exec(url);
+        const split = /https:\/\/(?:canary\.|ptb\.)?discord\.com\/channels\/(\d+)\/(\d+)(\/(\d+))?/.exec(url);
         let channelID: string;
         if(!split) {
           const mention = /<#(\d+)>/.exec(url);
