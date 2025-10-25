@@ -24,11 +24,10 @@ export default defineAITool(
       },
     } as const,
     responseJsonSchema: {
-      type: 'array',
-      // properties: {
-      //   '^.*$': discordMessageSchema,
-      // },
-      items: discordMessageSchema,
+      type: 'object',
+      properties: {
+        '^.*$': discordMessageSchema,
+      },
     },
   },
   async ({ url, limit, mode }, { client, msg }) => {
@@ -52,7 +51,9 @@ export default defineAITool(
         cache: false,
         limit: limit ?? 30,
       });
-      return [true, await Promise.all(messages.map(async message => [message.id, await discordMessageToAISchema(message)]))];
+      return [true, Object.fromEntries(
+        await Promise.all(messages.map(async message => [message.id, await discordMessageToAISchema(message)]))
+      )];
     } catch(err) {
       return [false, { error: 'エラーが発生しました\n' + (err instanceof Error ? err.name + ': ' + err.message : String(err)) }];
     }
