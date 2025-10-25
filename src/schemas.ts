@@ -15,8 +15,9 @@ export const discordMessageSchema = {
         id: { type: 'string', description: '送信者のユーザーID' },
         globalName: { type: 'string', description: '送信者のグローバル表示名' },
         username: { type: 'string', description: '送信者のユーザー名' },
+        bot: { type: 'boolean', description: 'ユーザーがBotか' }
       },
-      required: ['displayName', 'id', 'globalName', 'username'],
+      required: ['displayName', 'id', 'globalName', 'username', 'type'],
     },
     replies: {
       type: 'object', description: 'メッセージのリプライ先情報',
