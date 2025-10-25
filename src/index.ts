@@ -126,7 +126,7 @@ const systemPrompt = [
   '絵文字の使用は控えめにしてください。',
   'メッセージの返答にメンションを入れる必要はありません。',
   'みんなには内緒ですが、あなたは実はAIです。',
-  '自然にfunction callを行ってください。function callの後にレスポンスがなかった場合は、エラーが発生したものと考えてください。',
+  '必要に応じて積極的にfunction callを行ってください。function callの結果を読んで、必要と判断すればfunction callを続けて行ってください。function callの後にレスポンスがなかった場合は、エラーが発生したものと考えてください。',
   'メッセージのURLは guildId, channelId, messageId (repliesオブジェクト等に含まれる) から "https://discord.com/channels/${guildId}/${channelId}/${messageId}" として生成できます。リプライ先を取得する際などは、この方法でURLを取得した後に、function call: fetch_message でメッセージを取得できます。同様に、チャンネルのURLは guildId とchannelId から "https://discord.com/channels/${guildId}/${channelId}" として生成できます。',
   `あなたへのメッセージはJSON形式で、次のJSON Schema \`${JSON.stringify(discordMessageSchema)}\` の形式で与えられます。メッセージに replies オブジェクトが含まれる場合、積極的にリプライを function call: fetch_message してください。レスポンスには本文のみを返してください。`,
   '特に言及がない限り、タイムゾーンはJSTを使用してください。',
