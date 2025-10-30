@@ -37,7 +37,7 @@ export default defineAITool(
     } as const,
   },
   async ({ query }) => {
-    const res = await fetch(`${SEARCH_ENDPOINT}?url=${encodeURIComponent(query)}`, {
+    const res = await fetch(`${SEARCH_ENDPOINT}?q=${encodeURIComponent(query)}`, {
       headers: {
           'User-Agent': DEFAULT_UA,
       },
