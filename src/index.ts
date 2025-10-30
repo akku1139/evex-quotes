@@ -93,6 +93,7 @@ const processAIResponse = async (
       });
       break;
     }
+    aiLogger.debug(`function call: ${fn.name} (id: ${fn.id}) args: ${JSON.stringify(fn.args)}`);
     const toolRes = await executeTool(fn, client as Client<true>, msg); // FIXME:
     await msg.channel.sendTyping();
     await msg.channel.send(`-# Calling function "${fn.name}"...`);
