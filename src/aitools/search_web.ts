@@ -4,6 +4,43 @@ import { DEFAULT_UA } from '../def.ts';
 import { defineAITool } from './common.ts';
 import { getEnv } from '../utils.ts';
 
+/* example implementation
+import { Hono } from "hono";
+import { Browser } from 'happy-dom';
+
+const app = new Hono();
+const searchCache = await caches.open("search-cache");
+
+app.get("/searchep", async c => {
+  const url = new URL(`https://search.yahoo.co.jp/search?p=${encodeURIComponent(c.req.query('q'))}&ei=UTF-8`);
+  const cachedResponse = await searchCache.match(url);
+  console.log('url:', url.toString(), 'cache:', !!cachedResponse);
+  if(cachedResponse) return cachedResponse;
+
+  const browser = new Browser();
+  const page = browser.newPage();
+  page.url = url;
+  const httpRes = await fetch(url);
+  const text = await (httpRes).text();
+  console.log(`fetch result (${url}):`, httpRes.status, '(', httpRes.ok, ')');
+  page.content = text;
+  const document = page.mainFrame.document;
+
+  const res = c.json(
+    [...Array.from(document.getElementById('web').getElementsByTagName('li')).map((e: any) => {
+      return {
+        title: e.getElementsByTagName('a')[0].innerText,
+        summary: e.getElementsByTagName('div')[0]?.innerText,
+        link: e.getElementsByTagName('a')[0].href,
+      }
+    })]
+  );
+  if(httpRes.ok) await searchCache.put(url, res.clone());
+  return res;
+});
+
+Deno.serve(app.fetch);
+*/
 const SEARCH_ENDPOINT = new URL(getEnv('SEARCH_ENDPOINT')).toString();
 
 export default defineAITool(
