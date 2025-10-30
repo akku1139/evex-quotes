@@ -65,3 +65,26 @@ export const getCounter = () => {
     get() { return count},
   };
 };
+
+export const timeSuffix = (sec: number): string => {
+  if (sec < 0 || !Number.isFinite(sec)) {
+    throw new Error('Invalid input');
+  }
+
+  const seconds = Math.round(sec);
+
+  const MINUTE = 60;
+  const HOUR = 60 * MINUTE;
+  const THRESHOLD_MIN_SEC = 120;
+  const THRESHOLD_HOUR_MIN = 120 * MINUTE;
+
+  if (seconds < THRESHOLD_MIN_SEC) {
+    return `${seconds} sec`;
+  } else if (seconds < THRESHOLD_HOUR_MIN) {
+    const minutes = seconds / MINUTE;
+    return `${minutes.toFixed(1)} min`;
+  } else {
+    const hours = seconds / HOUR;
+    return `${hours.toFixed(1)} hour`;
+  }
+};

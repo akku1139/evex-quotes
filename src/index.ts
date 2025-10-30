@@ -2,12 +2,13 @@
 
 import { Client, GatewayIntentBits, type Snowflake, SlashCommandBuilder, type ApplicationCommandDataResolvable, MessageFlags, type ChatInputCommandInteraction, type OmitPartialGroupDMChannel, type Message } from 'discord.js';
 import { type Chat, type GenerateContentResponse, GoogleGenAI, type Schema as GenAISchema, type SendMessageParameters, type Part as GenAIPart } from '@google/genai';
-import { discordMessageToAISchema, getCounter, getEnv } from './utils.ts';
+import { discordMessageToAISchema, getCounter, getEnv, timeSuffix } from './utils.ts';
 import { Logger } from './logger.ts';
 import process from 'node:process';
 import { aitools, executeTool } from './aitool.ts';
 import { db } from './db.ts';
 import { systemPrompt } from './def.ts';
+import { RateLimiter } from './ratelimit.ts';
 
 // init log
 
@@ -72,6 +73,10 @@ addCommand(new SlashCommandBuilder().setName('enableai').setDescription('enable 
 
 const aichats: Map<Snowflake, Chat> = new Map();
 
+const aiRateLimit =  new RateLimiter('ai', {
+  'gemini-2.5-flash-lite': 70,
+}, 600);
+
 const processAIResponse = async (
   res: GenerateContentResponse,
   msg: OmitPartialGroupDMChannel<Message>,
@@ -121,7 +126,16 @@ const processAIGenError = (e: unknown) => ({
 const model = 'gemini-2.5-flash-lite';
 
 client.on('messageCreate', async m => {
-  if(!m.author.bot && m.mentions.users.has(client.user!.id) && await db.inArray('aichannels', m.channelId)) {
+  if(
+      !m.author.bot
+    && m.mentions.users.has(client.user!.id)
+    && await db.inArray('aichannels', m.channelId)
+  ) {
+    const rateLimited = aiRateLimit.checkRateLimited(m.author.id, model);
+    if(rateLimited[0]) {
+      m.reply(`You are rate limited. Try after in ${timeSuffix(rateLimited[1])}`)
+      return
+    }
     const chat: Chat = aichats.get(m.channelId) ?? (() => {
       const newChat = genai.chats.create({
         model,
