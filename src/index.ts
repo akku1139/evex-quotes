@@ -73,7 +73,7 @@ addCommand(new SlashCommandBuilder().setName('enableai').setDescription('enable 
 
 const aichats: Map<Snowflake, Chat> = new Map();
 
-const aiRateLimit =  new RateLimiter('ai', {
+const aiRateLimit = new RateLimiter('ai', {
   'gemini-2.5-flash-lite': 70,
 }, 600);
 
