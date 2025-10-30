@@ -4,6 +4,42 @@ import { DEFAULT_UA } from '../def.ts';
 import { defineAITool } from './common.ts';
 import { getEnv } from '../utils.ts';
 
+/* example code
+import { Hono } from "hono";
+import { Readability } from "@mozilla/readability";
+import { Browser } from 'happy-dom';
+
+const app = new Hono();
+const readableCache = await caches.open("readable-cache");
+
+app.get("/", (c) => {
+  return c.text("Hello Hono!");
+});
+
+app.get("/readability", async c => {
+  const url = c.req.query('url');
+  if(!URL.canParse(url)) return c.text('url error', 400);
+  const parsedURL = new URL(url);
+  const cachedResponse = await readableCache.match(parsedURL);
+  console.log('url:', url, 'cache:', !!cachedResponse);
+  if(cachedResponse) return cachedResponse;
+  const browser = new Browser();
+  const page = browser.newPage();
+  page.url = url;
+  const httpRes = await fetch(url);
+  console.log(`fetch result (${url}):`, httpRes.status, '(', httpRes.ok, ')');
+  page.content = await (httpRes).text();
+  const reader = new Readability(page.mainFrame.document);
+  const res = c.json({
+    ...reader.parse(),
+    http_status: httpRes.status,
+  });
+  if(httpRes.ok) await readableCache.put(parsedURL, res.clone());
+  return res;
+});
+
+Deno.serve(app.fetch);
+*/
 const READABILITY_ENDPOINT = new URL(getEnv('READABILITY_ENDPOINT')).toString();
 
 export default defineAITool(
