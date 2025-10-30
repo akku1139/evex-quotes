@@ -7,13 +7,15 @@ import fetch_messages_history from './aitools/fetch_messages_history.ts';
 import wikipedia_search from './aitools/wikipedia_search.ts';
 import wikipedia_read from './aitools/wikipedia_read.ts';
 // import search_duckduckgo_html from './aitools/search_duckducogo_html.ts'
+import read_web from './aitools/read_web.ts';
 
 export const aitools = {
   fetch_message,
   fetch_messages_history,
   wikipedia_search,
-  wikipedia_read
+  wikipedia_read,
   // search_duckduckgo_html,
+  read_web,
 } as const;
 
 const allAiTools = Object.keys(aitools) as Array<keyof typeof aitools>;

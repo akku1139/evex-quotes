@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+import { DEFAULT_UA } from '../def.ts';
 import { defineAITool } from './common.ts';
 
 export default defineAITool(
@@ -56,7 +57,7 @@ export default defineAITool(
       `https://ja.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json`,
       {
         headers: {
-          'User-Agent': 'MizukiBot (https://github.com/akku1139/evex-quotes)',
+          'User-Agent': DEFAULT_UA,
         },
         method: 'GET',
       }
