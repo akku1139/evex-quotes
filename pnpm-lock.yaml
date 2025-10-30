@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@google/genai':
-        specifier: ^1.26.0
-        version: 1.26.0
+        specifier: ^1.27.0
+        version: 1.27.0
       discord.js:
         specifier: ^14.23.2
         version: 14.23.2
@@ -62,8 +62,8 @@ packages:
     resolution: {integrity: sha512-wPlQDxEmlDg5IxhJPuxXr3Vy9AjYq5xCvFWGJyD7w7Np8ZGu+Mc+97LCoEc/+AYCo2IDpKioiH0/c/mj5ZR9Uw==}
     engines: {node: '>=16.11.0'}
 
-  '@google/genai@1.26.0':
-    resolution: {integrity: sha512-cy5y9RgN4jBK8zr+ePgZd0To1HDpzpjIgSM6aRCZnvYR+JupGtgc1SkkOCCi1MNZho7/MuKKdnQTLhhP8OQNvg==}
+  '@google/genai@1.27.0':
+    resolution: {integrity: sha512-sveeQqwyzO/U5kOjo3EflF1rf7v0ZGprrjPGmeT6V5u22IUTcA4wBFxW+q1n7hOX0M1iWR3944MImoNPOM+zsA==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       '@modelcontextprotocol/sdk': ^1.20.1
@@ -193,8 +193,8 @@ packages:
     resolution: {integrity: sha512-dTCcAe9fRQf06ELwel6lWWFrEbstwjUBYEhr5VRGoC+iPDZQucHppCowaIp8b8v92tU1G4X4H3b/Y6zXZxkMsQ==}
     engines: {node: '>=18'}
 
-  google-auth-library@10.4.1:
-    resolution: {integrity: sha512-VlvZ+QDWng3aPh++0BSQlSJyjn4qgLLTmqylAR3as0dr6YwPkZpHcZAngAFr68TDVCUSQVRTkV73K/D3m7vEIg==}
+  google-auth-library@10.4.2:
+    resolution: {integrity: sha512-EKiQasw6aEdxSovPEf1oBxCEvxjFamZ6MPaVOSPXZMnqKFLo+rrYjHyjKlFfZcXiKi9qAH6cutr5WRqqa1jKhg==}
     engines: {node: '>=18'}
 
   google-logging-utils@1.1.1:
@@ -337,9 +337,9 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@google/genai@1.26.0':
+  '@google/genai@1.27.0':
     dependencies:
-      google-auth-library: 10.4.1
+      google-auth-library: 10.4.2
       ws: 8.18.3
     transitivePeerDependencies:
       - bufferutil
@@ -468,7 +468,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  google-auth-library@10.4.1:
+  google-auth-library@10.4.2:
     dependencies:
       base64-js: 1.5.1
       ecdsa-sig-formatter: 1.0.11
