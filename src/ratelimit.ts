@@ -36,13 +36,13 @@ export class RateLimiter<
     return `${encodeURIComponent(userID)}:${encodeURIComponent(resourceID)}:${windowID}`;
   }
 
-  checkRateLimited(userID: string, resourceID: K): [false] | [true, number] {
+  checkRateLimited(userID: string, resourceID: K, cost: number = 1): [false] | [true, number] {
     const limit = this.#limits[resourceID];
 
     const key = this.#createRateLimitKey(userID, resourceID);
 
     const currentCount = this.#rateLimitStore.get(key) ?? 0;
-    const newCount = currentCount + 1;
+    const newCount = currentCount + cost;
 
     this.#rateLimitStore.set(key, newCount);
 
