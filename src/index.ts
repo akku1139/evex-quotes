@@ -98,7 +98,7 @@ const processAIResponse = async (
           response: { error: 'ツールの実行回数上限を超えました' },
         },
       });
-      aiRateLimit.checkRateLimited(m.author.id, model, 2);
+      aiRateLimit.checkRateLimited(msg.author.id, model, 2);
       break;
     }
     aiLogger.debug(`function call: ${fn.name} (id: ${fn.id}) args: ${JSON.stringify(fn.args)}`);
@@ -114,7 +114,7 @@ const processAIResponse = async (
       },
     });
     fnCounter.inc();
-    aiRateLimit.checkRateLimited(m.author.id, model, 0.7);
+    aiRateLimit.checkRateLimited(msg.author.id, model, 0.7);
   }
 
   return [false, {
