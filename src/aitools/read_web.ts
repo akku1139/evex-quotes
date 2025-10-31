@@ -28,11 +28,13 @@ app.get("/readability", async c => {
   page.url = url;
   const httpRes = await fetch(url);
   console.log(`fetch result (${url}):`, httpRes.status, '(', httpRes.ok, ')');
-  page.content = await (httpRes).text();
+  const text = await (httpRes).text();
+  page.content = text;
   const reader = new Readability(page.mainFrame.document);
   const res = c.json({
     ...reader.parse(),
     http_status: httpRes.status,
+    raw: text,
   });
   if(httpRes.ok) await readableCache.put(parsedURL, res.clone());
   return res;
@@ -65,7 +67,8 @@ export default defineAITool(
         siteName: { type: 'string', description: 'サイトの名前' },
         lang: { type: 'string', description: 'ページの言語' },
         publishedTime: { type: 'string', description: '公開日' },
-        http_status: { type: 'string', description: 'HTTPステータスコード' },
+        http_status: { type: 'number', description: 'HTTPステータスコード' },
+        raw: { type: 'string', description: 'ページの生データ' },
       },
       required: ['title', 'content', 'http_status'],
     } as const,
