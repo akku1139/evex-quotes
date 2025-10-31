@@ -77,6 +77,8 @@ const aiRateLimit = new RateLimiter('ai', {
   'gemini-2.5-flash-lite': 70,
 }, 600);
 
+const model = 'gemini-2.5-flash-lite';
+
 const processAIResponse = async (
   res: GenerateContentResponse,
   msg: OmitPartialGroupDMChannel<Message>,
@@ -96,6 +98,7 @@ const processAIResponse = async (
           response: { error: 'ツールの実行回数上限を超えました' },
         },
       });
+      aiRateLimit.checkRateLimited(m.author.id, model, 2);
       break;
     }
     aiLogger.debug(`function call: ${fn.name} (id: ${fn.id}) args: ${JSON.stringify(fn.args)}`);
@@ -111,6 +114,7 @@ const processAIResponse = async (
       },
     });
     fnCounter.inc();
+    aiRateLimit.checkRateLimited(m.author.id, model, 0.7);
   }
 
   return [false, {
@@ -122,8 +126,6 @@ const processAIGenError = (e: unknown) => ({
   text: 'An error occurred while generating the response.\n```ts\n'
     + (e instanceof Error ? `${e.name}: ${e.message}` : String(e)) + '\n```',
 } as GenerateContentResponse);
-
-const model = 'gemini-2.5-flash-lite';
 
 client.on('messageCreate', async m => {
   if(
@@ -187,7 +189,8 @@ client.on('messageCreate', async m => {
       if(!genDone) {
         res = {
           text: `rejected: generation loop limit reached.`,
-        } as GenerateContentResponse
+        } as GenerateContentResponse;
+        aiRateLimit.checkRateLimited(m.author.id, model, 2);
       }
     }
 
