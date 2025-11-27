@@ -103,6 +103,7 @@ export const lastMessagesToTinyAISchema = async (mm: MessageManager, last: Snowf
 
     lastAuthor = m[1].author.id;
   }
+  r.push(c as TinyDiscordMessageResponse); // 多分ここでの型は保障されてる
   return [Array.from(msgs).length < 20, r.slice(1)];
 };
 
