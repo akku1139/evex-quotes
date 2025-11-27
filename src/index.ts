@@ -167,11 +167,11 @@ client.on('messageCreate', async m => {
     // });
 
     const lm = await lastMessagesToTinyAISchema(m.channel.messages, chat.last);
-    let res: GenerateContentResponse = await chat.ai.sendMessage({
-      // message: m.content,
-      message: `your last message ID: ${chat.last}\n`
+    const toSend = `your last message ID: ${chat.last}\n`
         + (!lm[0] ? '----some messages----\n' : '')
-        + lm[1].map(e => JSON.stringify(e)).join('\n'),
+        + lm[1].map(e => JSON.stringify(e)).join('\n')
+    let res: GenerateContentResponse = await chat.ai.sendMessage({
+      message: toSend,
     }).catch(processAIGenError);
 
     const fnCounter = getCounter();
