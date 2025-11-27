@@ -70,6 +70,15 @@ export const lastMessagesToTinyAISchema = async (mm: MessageManager, last: Snowf
   let lastReply: Snowflake = '';
   const u = new Set<Snowflake>();
   for(const m of msgs) {
+    if(
+      lastAuthor !== m[1].author.id
+      || (m[1].reference?.messageId && (lastReply !== m[1].reference.messageId))
+    ) {
+      if(c) c.content = c.content.slice(0, -1);
+      r.push(c as TinyDiscordMessageResponse); // 最初の要素は捨てるので問題なし
+      c = void 0;
+    }
+
     if(!c) {
       c = {
         content: '',
@@ -92,17 +101,9 @@ export const lastMessagesToTinyAISchema = async (mm: MessageManager, last: Snowf
     c.content += '\n';
     c.ids.push(m[0]);
 
-    if(
-      lastAuthor !== m[1].author.id
-      || (m[1].reference?.messageId && (lastReply !== m[1].reference.messageId))
-    ) {
-      c.content = c.content.slice(0, -1);
-      r.push(c);
-      c = void 0;
-    }
     lastAuthor = m[1].author.id;
   }
-  return [Array.from(msgs).length < 20, r];
+  return [Array.from(msgs).length < 20, r.slice(0, -1)];
 };
 
 export const getCounter = () => {
