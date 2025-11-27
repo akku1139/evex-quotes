@@ -103,7 +103,7 @@ export const lastMessagesToTinyAISchema = async (mm: MessageManager, last: Snowf
 
     lastAuthor = m[1].author.id;
   }
-  return [Array.from(msgs).length < 20, r.slice(0, -1)];
+  return [Array.from(msgs).length < 20, r.slice(1)];
 };
 
 export const getCounter = () => {
