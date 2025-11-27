@@ -203,7 +203,8 @@ client.on('messageCreate', async m => {
     }
 
     // clearInterval(intervalId);
-    await m.reply(`${res.text}${res.text?.endsWith('\n') ? '' : '\n'}-# model: ${model}`);
+    const r = await m.reply(`${res.text}${res.text?.endsWith('\n') ? '' : '\n'}-# model: ${model}`);
+    chat.last = r.id;
   }
 });
 
