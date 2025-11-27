@@ -85,12 +85,14 @@ export const lastMessagesToTinyAISchema = async (mm: MessageManager, last: Snowf
     }
 
     c.content += m[1].reference?.type === 1 ? m[1].content.replace(/^/gm, '|> ') : m[1].content;
+    c.content += '\n';
     c.ids.push(m[0]);
 
     if(
       lastAuthor !== m[1].author.id
       || (m[1].reference?.messageId && (lastReply !== m[1].reference.messageId))
     ) {
+      c.content = c.content.slice(0, -1);
       r.push(c);
       c = void 0;
     }

@@ -175,7 +175,7 @@ client.on('messageCreate', async m => {
     const toSend = `your last message ID: ${chat.last}\n`
         + (!lm[0] ? '----some messages----\n' : '')
         + lm[1].map(e => JSON.stringify(e)).join('\n');
-    console.log(toSend); // debug
+    // console.log(toSend); // debug
     let res: GenerateContentResponse = await chat.ai.sendMessage({
       message: toSend,
     }).catch(processAIGenError);
