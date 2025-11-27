@@ -9,6 +9,7 @@ import wikipedia_read from './aitools/wikipedia_read.ts';
 // import search_duckduckgo_html from './aitools/search_duckducogo_html.ts'
 import read_web from './aitools/read_web.ts';
 import search_web from './aitools/search_web.ts';
+import long_memory from './aitools/long_memory.ts';
 
 export const aitools = {
   fetch_message,
@@ -18,6 +19,7 @@ export const aitools = {
   // search_duckduckgo_html,
   read_web,
   search_web,
+  long_memory,
 } as const;
 
 const allAiTools = Object.keys(aitools) as Array<keyof typeof aitools>;
