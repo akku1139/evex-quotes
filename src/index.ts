@@ -150,7 +150,7 @@ client.on('messageCreate', async m => {
         config: {
           systemInstruction: [
             ...systemPrompt,
-            `あなたが参加してるサーバーは '${m.guild?.name}' (id: ${m.guild?.id})、チャンネルは '${m.channel.name} (id: ${m.channelId}) です。`
+            `あなたが参加してるサーバーは "${m.guild?.name}" (id: ${m.guild?.id})、チャンネルは "${m.channel.name}" (id: ${m.channelId}) です。`
           ],
           tools: [{ functionDeclarations: Object.entries(aitools).map(t => {
             return {
