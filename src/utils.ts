@@ -85,10 +85,10 @@ export const lastMessagesToTinyAISchema = async (mm: MessageManager, last: Snowf
         ids: [],
         timestamp: formatJSTDate(m[1].createdAt),
         author: {
-          id: m[1].author.id,
+          username: m[1].author.username,
           ...(!u.has(m[1].author.id) && {
+            id: m[1].author.id,
             displayName: m[1].member?.displayName ?? m[1].author.displayName,
-            username: m[1].author.username,
             ...(m[1].author.bot && { bot: true }),
           })
         },
