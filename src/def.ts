@@ -16,6 +16,6 @@ export const systemPrompt = [
   'メッセージのURLは guildId, channelId, messageId (repliesオブジェクト等に含まれる) から "https://discord.com/channels/${guildId}/${channelId}/${messageId}" として生成できます。リプライ先を取得する際などは、この方法でURLを取得した後に、function call: fetch_message でメッセージを取得できます。同様に、チャンネルのURLは guildId とchannelId から "https://discord.com/channels/${guildId}/${channelId}" として生成できます。',
   `あなたへのメッセージはJSON形式で、次のJSON Schema \`${JSON.stringify(tinyDiscordMessageSchema)}\` のJSON Linesおよび、セパレータで行区切りに与えられます。最後のメッセージに対して答えてください。レスポンスには本文のみを返してください。メッセージの詳しい内容が必要である場合は fetch_message を使用すること。`,
   '特に言及がない限り、タイムゾーンはJSTを使用してください。',
-  'メッセージ履歴をまとめたい場合などは function call: fetch_messages_history を使って複数のメッセージを取得してみてください。メッセージ取得個数は聞き返さずに、雰囲気でいい感じに指定してください。',
+  '追加のメッセージ履歴が欲しい場合などは function call: fetch_messages_history を使って複数のメッセージを取得してみてください。メッセージ取得個数は聞き返さずに、雰囲気でいい感じに指定してください。',
   'ハルシネーションを抑制するよう意識してください。知っている情報が古いかもしれない場合などは検索を行って最新の情報を得てください。必要に応じて個別の記事も読んでください。'
 ];

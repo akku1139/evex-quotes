@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { Client, GatewayIntentBits, type Snowflake, SlashCommandBuilder, type ApplicationCommandDataResolvable, MessageFlags, type ChatInputCommandInteraction, type OmitPartialGroupDMChannel, type Message } from 'discord.js';
+import { Client, GatewayIntentBits, type Snowflake, SlashCommandBuilder, type ApplicationCommandDataResolvable, MessageFlags, type ChatInputCommandInteraction, type OmitPartialGroupDMChannel, type Message, TextChannel } from 'discord.js';
 import { type Chat, type GenerateContentResponse, GoogleGenAI, type Schema as GenAISchema, type SendMessageParameters, type Part as GenAIPart } from '@google/genai';
 import { lastMessagesToTinyAISchema, getCounter, getEnv, timeSuffix } from './utils.ts';
 import { Logger } from './logger.ts';
@@ -136,6 +136,8 @@ client.on('messageCreate', async m => {
       !m.author.bot
     && m.mentions.users.has(client.user!.id)
     && await db.inArray('aichannels', m.channelId)
+    && m.channel instanceof TextChannel
+    && m.guild !== null
   ) {
     const rateLimited = aiRateLimit.checkRateLimited(m.author.id, model);
     if(rateLimited[0]) {
@@ -146,7 +148,10 @@ client.on('messageCreate', async m => {
       const newChat = genai.chats.create({
         model,
         config: {
-          systemInstruction: systemPrompt,
+          systemInstruction: [
+            ...systemPrompt,
+            `あなたが参加してるサーバーは '${m.guild?.name}' (id: ${m.guild?.id})、チャンネルは '${m.channel.name} (id: ${m.channelId}) です。`
+          ],
           tools: [{ functionDeclarations: Object.entries(aitools).map(t => {
             return {
               name: t[0],
@@ -170,6 +175,7 @@ client.on('messageCreate', async m => {
     const toSend = `your last message ID: ${chat.last}\n`
         + (!lm[0] ? '----some messages----\n' : '')
         + lm[1].map(e => JSON.stringify(e)).join('\n');
+    console.log(toSend); // debug
     let res: GenerateContentResponse = await chat.ai.sendMessage({
       message: toSend,
     }).catch(processAIGenError);
