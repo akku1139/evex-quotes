@@ -49,7 +49,7 @@ export const tinyDiscordMessageSchema = {
         username: { type: 'string', description: '送信者のユーザー名' },
         bot: { type: 'boolean', description: 'ユーザーがBotか' },
       },
-      required: ['displayName', 'id', 'username']
+      required: ['id']
     },
     replyID: { type: 'string', description: 'リプライ先のメセージID' },
   },

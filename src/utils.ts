@@ -68,6 +68,7 @@ export const lastMessagesToTinyAISchema = async (mm: MessageManager, last: Snowf
   let c: TinyDiscordMessageResponse|undefined = void 0;
   let lastAuthor: Snowflake = '';
   let lastReply: Snowflake = '';
+  const u = new Set<Snowflake>();
   for(const m of msgs) {
     if(!c) {
       c = {
@@ -76,12 +77,15 @@ export const lastMessagesToTinyAISchema = async (mm: MessageManager, last: Snowf
         timestamp: formatJSTDate(m[1].createdAt),
         author: {
           id: m[1].author.id,
-          displayName: m[1].member?.displayName ?? m[1].author.displayName,
-          username: m[1].author.username,
-          ...(m[1].author.bot && { bot: true }),
+          ...(u.has(m[1].author.id) && {
+            displayName: m[1].member?.displayName ?? m[1].author.displayName,
+            username: m[1].author.username,
+            ...(m[1].author.bot && { bot: true }),
+          })
         },
         ...(m[1].reference?.messageId && { replyID: m[1].reference.messageId }),
       };
+      u.add(m[1].author.id);
     }
 
     c.content += m[1].reference?.type === 1 ? m[1].content.replace(/^/gm, '|> ') : m[1].content;
