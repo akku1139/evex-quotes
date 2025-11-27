@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { Client, GatewayIntentBits, type Snowflake, SlashCommandBuilder, type ApplicationCommandDataResolvable, MessageFlags, type ChatInputCommandInteraction, type OmitPartialGroupDMChannel, type Message, TextChannel } from 'discord.js';
+import { Client, GatewayIntentBits, type Snowflake, SlashCommandBuilder, type ApplicationCommandDataResolvable, MessageFlags, type ChatInputCommandInteraction, type OmitPartialGroupDMChannel, type Message, TextChannel, ThreadChannel } from 'discord.js';
 import { type Chat, type GenerateContentResponse, GoogleGenAI, type Schema as GenAISchema, type SendMessageParameters, type Part as GenAIPart } from '@google/genai';
 import { lastMessagesToTinyAISchema, getCounter, getEnv, timeSuffix } from './utils.ts';
 import { Logger } from './logger.ts';
@@ -136,7 +136,7 @@ client.on('messageCreate', async m => {
       !m.author.bot
     && m.mentions.users.has(client.user!.id)
     && await db.inArray('aichannels', m.channelId)
-    && m.channel instanceof TextChannel
+    && (m.channel instanceof TextChannel || m.channel instanceof ThreadChannel)
     && m.guild !== null
   ) {
     const rateLimited = aiRateLimit.checkRateLimited(m.author.id, model);
