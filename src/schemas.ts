@@ -15,7 +15,7 @@ export const discordMessageSchema = {
         id: { type: 'string', description: '送信者のユーザーID' },
         globalName: { type: 'string', description: '送信者のグローバル表示名' },
         username: { type: 'string', description: '送信者のユーザー名' },
-        bot: { type: 'boolean', description: 'ユーザーがBotか' }
+        bot: { type: 'boolean', description: 'ユーザーがBotか' },
       },
       required: ['displayName', 'id', 'globalName', 'username', 'bot'],
     },
@@ -33,3 +33,26 @@ export const discordMessageSchema = {
   required: ['content', 'url', 'timestamp', 'author'],
 } as const satisfies JSONSchema;
 export type DiscordMessageResponse = FromSchema<typeof discordMessageSchema>;
+
+export const tinyDiscordMessageSchema = {
+  type: 'object',
+  properties: {
+    content: { type: 'string', description: 'メッセージの内容(連続したメッセージは結合されます)' },
+    ids: { type: 'array', items: { type: 'string' }, description: 'メッセージのID(連続していた場合は複数指定されます)' },
+    timestamp: { type: 'string', description: 'メッセージの送信時刻' },
+    author: {
+      type: 'object',
+      description: 'メッセージ送信者の情報(簡略化されています)',
+      properties: {
+        displayName: { type: 'string', description: '送信者の表示名' },
+        id: { type: 'string', description: '送信者のユーザーID' },
+        username: { type: 'string', description: '送信者のユーザー名' },
+        bot: { type: 'boolean', description: 'ユーザーがBotか' },
+      },
+      required: ['displayName', 'id', 'username']
+    },
+    replyID: { type: 'string', description: 'リプライ先のメセージID' },
+  },
+  required: ['content', 'ids', 'author', 'timestamp'],
+} as const satisfies JSONSchema;
+export type TinyDiscordMessageResponse = FromSchema<typeof tinyDiscordMessageSchema>;

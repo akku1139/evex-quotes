@@ -2,7 +2,7 @@
 
 import { Client, GatewayIntentBits, type Snowflake, SlashCommandBuilder, type ApplicationCommandDataResolvable, MessageFlags, type ChatInputCommandInteraction, type OmitPartialGroupDMChannel, type Message } from 'discord.js';
 import { type Chat, type GenerateContentResponse, GoogleGenAI, type Schema as GenAISchema, type SendMessageParameters, type Part as GenAIPart } from '@google/genai';
-import { discordMessageToAISchema, getCounter, getEnv, timeSuffix } from './utils.ts';
+import { lastMessagesToTinyAISchema, getCounter, getEnv, timeSuffix } from './utils.ts';
 import { Logger } from './logger.ts';
 import process from 'node:process';
 import { aitools, executeTool } from './aitool.ts';
@@ -71,7 +71,11 @@ addCommand(new SlashCommandBuilder().setName('enableai').setDescription('enable 
   }
 });
 
-const aichats: Map<Snowflake, Chat> = new Map();
+type ChatData = {
+  ai: Chat,
+  last: Snowflake,
+};
+const aichats: Map<Snowflake, ChatData> = new Map();
 
 const aiRateLimit = new RateLimiter('ai', {
   'gemini-2.5-flash-lite': 70,
@@ -135,10 +139,10 @@ client.on('messageCreate', async m => {
   ) {
     const rateLimited = aiRateLimit.checkRateLimited(m.author.id, model);
     if(rateLimited[0]) {
-      m.reply(`You are rate limited. Try after in ${timeSuffix(rateLimited[1])}`)
-      return
+      m.reply(`You are rate limited. Try after in ${timeSuffix(rateLimited[1])}`);
+      return;
     }
-    const chat: Chat = aichats.get(m.channelId) ?? (() => {
+    const chat: ChatData = aichats.get(m.channelId) ?? (() => {
       const newChat = genai.chats.create({
         model,
         config: {
@@ -153,17 +157,21 @@ client.on('messageCreate', async m => {
           }) }],
         },
       });
-      aichats.set(m.channelId, newChat);
-      return newChat;
+      const tmp = { ai: newChat, last: '0' };
+      aichats.set(m.channelId, tmp);
+      return tmp;
     })();
 
     // const intervalId = setInterval(() => {
       m.channel.sendTyping();
     // });
 
-    let res: GenerateContentResponse = await chat.sendMessage({
+    const lm = await lastMessagesToTinyAISchema(m.channel.messages, chat.last);
+    let res: GenerateContentResponse = await chat.ai.sendMessage({
       // message: m.content,
-      message: JSON.stringify(await discordMessageToAISchema(m)),
+      message: `your last message ID: ${chat.last}\n`
+        + (!lm[0] ? '----some messages----\n' : '')
+        + lm[1].map(e => JSON.stringify(e)).join('\n'),
     }).catch(processAIGenError);
 
     const fnCounter = getCounter();
@@ -179,7 +187,7 @@ client.on('messageCreate', async m => {
           break;
         }
         ++genLoopCount;
-        res = await chat.sendMessage(ret[1]).catch(processAIGenError);
+        res = await chat.ai.sendMessage(ret[1]).catch(processAIGenError);
         ret = await processAIResponse(res, m, fnCounter);
         if(ret[0]) {
           genDone = true;

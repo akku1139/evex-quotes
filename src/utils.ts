@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { Message } from 'discord.js';
+import { MessageManager, Message, type Snowflake } from 'discord.js';
 import process from 'node:process';
-import type { DiscordMessageResponse } from './schemas.ts';
+import type { DiscordMessageResponse, TinyDiscordMessageResponse } from './schemas.ts';
 
 export const getEnv = (name: string) => {
   const v = process.env[name];
@@ -56,6 +56,47 @@ export const discordMessageToAISchema = async (m: Message): Promise<DiscordMessa
       type: m.reference.type,
     } : void 0,
   };
+};
+
+// とりあえず20メッセージでハードコーディング
+// 戻り値の1つ目はlastが履歴に含まれていたとき
+export const lastMessagesToTinyAISchema = async (mm: MessageManager, last: Snowflake): Promise<[boolean, Array<TinyDiscordMessageResponse>]> => {
+  const lastBI = BigInt(last);
+  const msgs = (await mm.fetch({ limit: 20 })).filter(msg => BigInt(msg.id) > lastBI).reverse();
+
+  const r: Array<TinyDiscordMessageResponse> = [];
+  let c: TinyDiscordMessageResponse|undefined = void 0;
+  let lastAuthor: Snowflake = '';
+  let lastReply: Snowflake = '';
+  for(const m of msgs) {
+    if(!c) {
+      c = {
+        content: '',
+        ids: [],
+        timestamp: formatJSTDate(m[1].createdAt),
+        author: {
+          id: m[1].author.id,
+          displayName: m[1].member?.displayName ?? m[1].author.displayName,
+          username: m[1].author.username,
+          ...(m[1].author.bot && { bot: true }),
+        },
+        ...(m[1].reference?.messageId && { replyID: m[1].reference.messageId }),
+      };
+    }
+
+    c.content += m[1].reference?.type === 1 ? m[1].content.replace(/^/gm, '|> ') : m[1].content;
+    c.ids.push(m[0]);
+
+    if(
+      lastAuthor !== m[1].author.id
+      || (m[1].reference?.messageId && (lastReply !== m[1].reference.messageId))
+    ) {
+      r.push(c);
+      c = void 0;
+    }
+    lastAuthor = m[1].author.id;
+  }
+  return [Array.from(msgs).length < 20, r];
 };
 
 export const getCounter = () => {
