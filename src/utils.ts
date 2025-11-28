@@ -137,3 +137,7 @@ export const timeSuffix = (sec: number): string => {
     return `${hours.toFixed(1)} hour`;
   }
 };
+
+export const splitLongString = (text: string, len: number): Array<string> => {
+
+};
