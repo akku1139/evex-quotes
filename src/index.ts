@@ -209,7 +209,11 @@ client.on('messageCreate', async m => {
     }
 
     // clearInterval(intervalId);
-    const r = await m.reply(`${res.text}${res.text?.endsWith('\n') ? '' : '\n'}-# model: ${model}`);
+
+    if(!res.text) {
+      // no response from model
+    }
+    const r = await m.reply(`${res.text}${res.text?.endsWith('\n') ? '' : '\n'}-# model: ${model} ${res.usageMetadata?.totalTokenCount ? `(${res.usageMetadata.totalTokenCount} tokens)` : ''}`);
     chat.last = r.id;
   }
 });
