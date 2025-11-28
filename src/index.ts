@@ -74,6 +74,7 @@ addCommand(new SlashCommandBuilder().setName('enableai').setDescription('enable 
 type ChatData = {
   ai: Chat,
   last: Snowflake,
+  members: Set<Snowflake>,
 };
 const aichats: Map<Snowflake, ChatData> = new Map();
 
@@ -162,7 +163,7 @@ client.on('messageCreate', async m => {
           }) }],
         },
       });
-      const tmp = { ai: newChat, last: '0' };
+      const tmp: ChatData = { ai: newChat, last: '0', members: new Set() };
       aichats.set(m.channelId, tmp);
       return tmp;
     })();
@@ -171,7 +172,7 @@ client.on('messageCreate', async m => {
       m.channel.sendTyping();
     // });
 
-    const lm = await lastMessagesToTinyAISchema(m.channel.messages, chat.last);
+    const lm = await lastMessagesToTinyAISchema(m.channel.messages, chat.last, chat.members);
     const toSend = `your last message ID: ${chat.last}\n`
         + (!lm[0] ? '----some messages----\n' : '')
         + lm[1].map(e => JSON.stringify(e)).join('\n');

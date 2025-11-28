@@ -60,7 +60,8 @@ export const discordMessageToAISchema = async (m: Message): Promise<DiscordMessa
 
 // とりあえず20メッセージでハードコーディング
 // 戻り値の1つ目はlastが履歴に含まれていたとき
-export const lastMessagesToTinyAISchema = async (mm: MessageManager, last: Snowflake): Promise<[boolean, Array<TinyDiscordMessageResponse>]> => {
+// uは破壊的
+export const lastMessagesToTinyAISchema = async (mm: MessageManager, last: Snowflake, u: Set<Snowflake>): Promise<[boolean, Array<TinyDiscordMessageResponse>]> => {
   const lastBI = BigInt(last);
   const msgs = (await mm.fetch({ limit: 20 })).filter(msg => BigInt(msg.id) > lastBI).reverse();
 
@@ -68,7 +69,6 @@ export const lastMessagesToTinyAISchema = async (mm: MessageManager, last: Snowf
   let c: TinyDiscordMessageResponse|undefined = void 0;
   let lastAuthor: Snowflake = '';
   let lastReply: Snowflake = '';
-  const u = new Set<Snowflake>();
   for(const m of msgs) {
     if(
       lastAuthor !== m[1].author.id
