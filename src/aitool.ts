@@ -19,7 +19,7 @@ export const aitools = {
   // search_duckduckgo_html,
   read_web,
   search_web,
-  long_memory,
+  // long_memory,
 } as const;
 
 const allAiTools = Object.keys(aitools) as Array<keyof typeof aitools>;
