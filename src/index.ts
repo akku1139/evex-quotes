@@ -173,8 +173,8 @@ client.on('messageCreate', async m => {
       m.channel.sendTyping();
     // });
 
-    const lm = await lastMessagesToTinyAISchema(m.channel.messages, JSON.stringify(chat.last), chat.members);
-    const toSend = `your last message ID: ${chat.last}\n`
+    const lm = await lastMessagesToTinyAISchema(m.channel.messages, chat.last.at(-1) ?? '0', chat.members);
+    const toSend = `your last message ID: ${JSON.stringify(chat.last)}\n`
         + (!lm[0] ? '----some messages----\n' : '')
         + lm[1].map(e => JSON.stringify(e)).join('\n');
     // console.log(toSend); // debug
