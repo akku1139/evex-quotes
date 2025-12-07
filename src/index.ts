@@ -2,7 +2,7 @@
 
 import { Client, GatewayIntentBits, type Snowflake, SlashCommandBuilder, type ApplicationCommandDataResolvable, MessageFlags, type ChatInputCommandInteraction, type OmitPartialGroupDMChannel, type Message, TextChannel, ThreadChannel } from 'discord.js';
 import { type Chat, type GenerateContentResponse, GoogleGenAI, type Schema as GenAISchema, type SendMessageParameters, type Part as GenAIPart } from '@google/genai';
-import { lastMessagesToTinyAISchema, getCounter, getEnv, timeSuffix } from './utils.ts';
+import { lastMessagesToTinyAISchema, getCounter, getEnv, timeSuffix, splitLongString } from './utils.ts';
 import { Logger } from './logger.ts';
 import process from 'node:process';
 import { aitools, executeTool } from './aitool.ts';
@@ -73,7 +73,7 @@ addCommand(new SlashCommandBuilder().setName('enableai').setDescription('enable 
 
 type ChatData = {
   ai: Chat,
-  last: Snowflake,
+  last: Array<Snowflake>,
   members: Set<Snowflake>,
   tokenCount: number,
 };
@@ -164,7 +164,7 @@ client.on('messageCreate', async m => {
           }) }],
         },
       });
-      const tmp: ChatData = { ai: newChat, last: '0', members: new Set(), tokenCount: 0 };
+      const tmp: ChatData = { ai: newChat, last: [], members: new Set(), tokenCount: 0 };
       aichats.set(m.channelId, tmp);
       return tmp;
     })();
@@ -173,7 +173,7 @@ client.on('messageCreate', async m => {
       m.channel.sendTyping();
     // });
 
-    const lm = await lastMessagesToTinyAISchema(m.channel.messages, chat.last, chat.members);
+    const lm = await lastMessagesToTinyAISchema(m.channel.messages, JSON.stringify(chat.last), chat.members);
     const toSend = `your last message ID: ${chat.last}\n`
         + (!lm[0] ? '----some messages----\n' : '')
         + lm[1].map(e => JSON.stringify(e)).join('\n');
@@ -215,8 +215,16 @@ client.on('messageCreate', async m => {
     if(!res.text) {
       // no response from model
     }
-    const r = await m.reply(`${res.text}${res.text?.endsWith('\n') ? '' : '\n'}-# model: ${model} ${res.usageMetadata?.totalTokenCount ? `(${res.usageMetadata.totalTokenCount - chat.tokenCount} tokens)` : ''}`);
-    chat.last = r.id;
+
+    const parts = splitLongString(`${res.text}${res.text?.endsWith('\n') ? '' : '\n'}-# model: ${model} ${res.usageMetadata?.totalTokenCount ? `(${res.usageMetadata.totalTokenCount - chat.tokenCount} tokens)` : ''}`, 1500)
+    let send: (text: string) => Promise<{ id: Snowflake }> = m.reply;
+    chat.last = [];
+
+    for(const part of parts) {
+      chat.last.push((await send(part)).id);
+      send = m.channel.send;
+    }
+
     if(res.usageMetadata?.totalTokenCount) chat.tokenCount = res.usageMetadata.totalTokenCount;
   }
 });

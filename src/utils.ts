@@ -138,6 +138,27 @@ export const timeSuffix = (sec: number): string => {
   }
 };
 
+// 初っ端に改行があって、そのあと改行がないと改行だけのパートが生成される
 export const splitLongString = (text: string, len: number): Array<string> => {
+  const result: Array<string> = [];
 
+  let rest = text;
+  while(true) {
+    if(rest.length <= len) {
+      result.push(rest);
+      break;
+    }
+    const part = rest.substring(0, len);
+    const i = part.lastIndexOf('\n');
+    if(i === -1) {
+      result.push(part);
+      rest = rest.substring(len);
+    } else {
+      result.push(part.substring(0, i+1)); // i+1をiにすると改行は消化される
+      rest = rest.substring(i+1);
+    }
+    if(rest==='') break;
+  }
+
+  return result; // 空文字列をfilterしてあげればいい
 };
