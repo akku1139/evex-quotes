@@ -217,12 +217,20 @@ client.on('messageCreate', async m => {
     }
 
     const parts = splitLongString(`${res.text}${res.text?.endsWith('\n') ? '' : '\n'}-# model: ${model} ${res.usageMetadata?.totalTokenCount ? `(${res.usageMetadata.totalTokenCount - chat.tokenCount} tokens)` : ''}`, 1500)
-    let send: (text: string) => Promise<{ id: Snowflake }> = m.reply;
     chat.last = [];
+    let first = false;
 
     for(const part of parts) {
-      chat.last.push((await send(part)).id);
-      send = m.channel.send;
+      if(first) {
+        chat.last.push(
+          (await m.reply(part)).id
+        );
+        first = false;
+      } else {
+        chat.last.push(
+          (await m.channel.send(part)).id
+        );
+      }
     }
 
     if(res.usageMetadata?.totalTokenCount) chat.tokenCount = res.usageMetadata.totalTokenCount;
