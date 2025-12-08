@@ -12,7 +12,7 @@
   "packageManager": "pnpm@10.18.3",
   "devDependencies": {
     "@types/node": "^22.18.12",
-    "@typescript/native-preview": "7.0.0-dev.20251102.1",
+    "@typescript/native-preview": "7.0.0-dev.20251208.1",
     "json-schema-to-ts": "^3.1.1",
     "typescript": "^5.9.3"
   },
