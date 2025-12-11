@@ -218,7 +218,7 @@ client.on('messageCreate', async m => {
 
     const parts = splitLongString(`${res.text}${res.text?.endsWith('\n') ? '' : '\n'}-# model: ${model} ${res.usageMetadata?.totalTokenCount ? `(${res.usageMetadata.totalTokenCount - chat.tokenCount} tokens)` : ''}`, 1500)
     chat.last = [];
-    let first = false;
+    let first = true;
 
     for(const part of parts) {
       if(first) {
