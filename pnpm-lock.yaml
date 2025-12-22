@@ -19,8 +19,8 @@ importers:
         specifier: ^22.18.12
         version: 22.18.12
       '@typescript/native-preview':
-        specifier: 7.0.0-dev.20251102.1
-        version: 7.0.0-dev.20251102.1
+        specifier: 7.0.0-dev.20251221.1
+        version: 7.0.0-dev.20251221.1
       json-schema-to-ts:
         specifier: ^3.1.1
         version: 3.1.1
@@ -97,43 +97,43 @@ packages:
   '@types/ws@8.18.1':
     resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
 
-  '@typescript/native-preview-darwin-arm64@7.0.0-dev.20251102.1':
-    resolution: {integrity: sha512-AO2U9EWVO766Y9HTd3emULxpfe2QDdHjResXGQfNlgyFKUdfcKWZowBQllHOAT6J7Ll4qYcIt1Sw9wtQq+n2mQ==}
+  '@typescript/native-preview-darwin-arm64@7.0.0-dev.20251221.1':
+    resolution: {integrity: sha512-qzNHPNg3WG7Zautiy+e6KzjGLfQhAmVHlDkhistpfPQzaIqJl4nCYEnumdlAripv8OxPrE+9Gzn6dvFyaW0TAQ==}
     cpu: [arm64]
     os: [darwin]
 
-  '@typescript/native-preview-darwin-x64@7.0.0-dev.20251102.1':
-    resolution: {integrity: sha512-8DACSF3+1Kq022ofqEdFXUj5A/OJdQI3845tOfdeJHZFJTxiD0X4Q0wcZlDgLubuNJCN8lPO2RGjmWpbmIqxZg==}
+  '@typescript/native-preview-darwin-x64@7.0.0-dev.20251221.1':
+    resolution: {integrity: sha512-7FHQOBfNhZ11HaHGxECOZWlEg4M1Wzo5lxNlKYfkz5gC8ecTNTiZekZGkRSjn6ARrsd4VI7Oa2AvDmV/lD0rUw==}
     cpu: [x64]
     os: [darwin]
 
-  '@typescript/native-preview-linux-arm64@7.0.0-dev.20251102.1':
-    resolution: {integrity: sha512-99b3L81QnTGEqU4KrV2/siiK8vK1swo8P+MEprn2CoO9Y5PHAf5pbOCAXp5Wq2e0lyKWl0NGW/cqvWk7FBndfQ==}
+  '@typescript/native-preview-linux-arm64@7.0.0-dev.20251221.1':
+    resolution: {integrity: sha512-zY7S1z5zLWhDNZ++/bdeCIQQ50lCgKLgWXIJtlOCvuZnAdUpIz0r9WZvnLY920U2Zjt4mOMokud2B6YpGi/rXw==}
     cpu: [arm64]
     os: [linux]
 
-  '@typescript/native-preview-linux-arm@7.0.0-dev.20251102.1':
-    resolution: {integrity: sha512-bzOrxNpvI4mJEyR56A2XAqvImtwhR0v52HCDHxGDar6WXfyjDoISw9SD9mPNWUNbqBuU7i6Z2jKMwXt+33Mozw==}
+  '@typescript/native-preview-linux-arm@7.0.0-dev.20251221.1':
+    resolution: {integrity: sha512-9vbd4/tb+uxcN4GYlmsXdtC3cilfB8VAlxfX7dNJ3BijTTxksKEs5XhSP4Py/Zoo0PZyBQkRE/9Fy1ALi2R6Bw==}
     cpu: [arm]
     os: [linux]
 
-  '@typescript/native-preview-linux-x64@7.0.0-dev.20251102.1':
-    resolution: {integrity: sha512-1yz7uhuEFeoG9r2w5CZqFSvFmqr0ptzv/ZpOxFMu+95YxDvk1NVKUkZXEneOWa+mK/7GymrwbB41bVdl8HtaEw==}
+  '@typescript/native-preview-linux-x64@7.0.0-dev.20251221.1':
+    resolution: {integrity: sha512-zctyVT6ZuBEpX8SBeI07u5u1NMw/r4eIKOhWDVkN50jb0lnet/Ejc2ES52e9Emm/Fpi9GY2VywKw37xAUb9LQQ==}
     cpu: [x64]
     os: [linux]
 
-  '@typescript/native-preview-win32-arm64@7.0.0-dev.20251102.1':
-    resolution: {integrity: sha512-U0ay+amC8ZmmnNEitccixJfLKra8MaKgbGdNQBSZP1jelGCgNgCLl5DEpla5ElVxTcfcVYkAVWpjjiGaaNuZTQ==}
+  '@typescript/native-preview-win32-arm64@7.0.0-dev.20251221.1':
+    resolution: {integrity: sha512-a/sf8qDNAlDWylDgc/WaMHSdNU+E+7jBrKyQBoXhfCB81LRhFzbDuvpDW3BBDzcmq5fUgpStOdcgvKCsLAjWzA==}
     cpu: [arm64]
     os: [win32]
 
-  '@typescript/native-preview-win32-x64@7.0.0-dev.20251102.1':
-    resolution: {integrity: sha512-4Y4K70O7w34P81o/SD0tcpC2daVJcXCn3t/efjq64BMO9XTyEXLpiVVJ+BGGQTFmvgkGYGR6vHbCZTm2WizcVg==}
+  '@typescript/native-preview-win32-x64@7.0.0-dev.20251221.1':
+    resolution: {integrity: sha512-8x1dGowxOYHGrYE/ODJt+dHrKM8yemOfqAgmSfJtCGJmMhLbfK9YWJAAWU4wEbJz3vfgKbb3O3Et5ybmmP5SGA==}
     cpu: [x64]
     os: [win32]
 
-  '@typescript/native-preview@7.0.0-dev.20251102.1':
-    resolution: {integrity: sha512-PwWO+XO8yFZaDYiOW/lXYLDqeCaSkm+Ku/yvnGB19sdZ62514JeCtC3xSChVH8Cr1FLGgdSpsnn1ACp3Y48FqA==}
+  '@typescript/native-preview@7.0.0-dev.20251221.1':
+    resolution: {integrity: sha512-MZdOju//ONcl4vSozTsAa89zOuSZ1EL9FRrQnG1u5k8g+do8PHAB/OvCXm3JsT/C9Q8UMth40aakfmn/j2fGrQ==}
     hasBin: true
 
   '@vladfrangu/async_event_emitter@2.4.7':
@@ -504,36 +504,36 @@ snapshots:
     dependencies:
       '@types/node': 22.18.12
 
-  '@typescript/native-preview-darwin-arm64@7.0.0-dev.20251102.1':
+  '@typescript/native-preview-darwin-arm64@7.0.0-dev.20251221.1':
     optional: true
 
-  '@typescript/native-preview-darwin-x64@7.0.0-dev.20251102.1':
+  '@typescript/native-preview-darwin-x64@7.0.0-dev.20251221.1':
     optional: true
 
-  '@typescript/native-preview-linux-arm64@7.0.0-dev.20251102.1':
+  '@typescript/native-preview-linux-arm64@7.0.0-dev.20251221.1':
     optional: true
 
-  '@typescript/native-preview-linux-arm@7.0.0-dev.20251102.1':
+  '@typescript/native-preview-linux-arm@7.0.0-dev.20251221.1':
     optional: true
 
-  '@typescript/native-preview-linux-x64@7.0.0-dev.20251102.1':
+  '@typescript/native-preview-linux-x64@7.0.0-dev.20251221.1':
     optional: true
 
-  '@typescript/native-preview-win32-arm64@7.0.0-dev.20251102.1':
+  '@typescript/native-preview-win32-arm64@7.0.0-dev.20251221.1':
     optional: true
 
-  '@typescript/native-preview-win32-x64@7.0.0-dev.20251102.1':
+  '@typescript/native-preview-win32-x64@7.0.0-dev.20251221.1':
     optional: true
 
-  '@typescript/native-preview@7.0.0-dev.20251102.1':
+  '@typescript/native-preview@7.0.0-dev.20251221.1':
     optionalDependencies:
-      '@typescript/native-preview-darwin-arm64': 7.0.0-dev.20251102.1
-      '@typescript/native-preview-darwin-x64': 7.0.0-dev.20251102.1
-      '@typescript/native-preview-linux-arm': 7.0.0-dev.20251102.1
-      '@typescript/native-preview-linux-arm64': 7.0.0-dev.20251102.1
-      '@typescript/native-preview-linux-x64': 7.0.0-dev.20251102.1
-      '@typescript/native-preview-win32-arm64': 7.0.0-dev.20251102.1
-      '@typescript/native-preview-win32-x64': 7.0.0-dev.20251102.1
+      '@typescript/native-preview-darwin-arm64': 7.0.0-dev.20251221.1
+      '@typescript/native-preview-darwin-x64': 7.0.0-dev.20251221.1
+      '@typescript/native-preview-linux-arm': 7.0.0-dev.20251221.1
+      '@typescript/native-preview-linux-arm64': 7.0.0-dev.20251221.1
+      '@typescript/native-preview-linux-x64': 7.0.0-dev.20251221.1
+      '@typescript/native-preview-win32-arm64': 7.0.0-dev.20251221.1
+      '@typescript/native-preview-win32-x64': 7.0.0-dev.20251221.1
 
   '@vladfrangu/async_event_emitter@2.4.7': {}
 
